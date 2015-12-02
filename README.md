@@ -1,18 +1,18 @@
 # fusarium_ex_pea
 Commands used in the analysis of Fusarium oxysporum isolates ex. pea
 
-# sclerotinia_sclerotiorum
-Commands used fr the analysis of Sclerotinia spp. genomes
 
-Sclerotinia sclerotiorum
+Fusarium oxysporum f.sp pisi
 ====================
 
 
-Commands used during analysis of the Sclerotinia sclerotiorum genome. Note - all this work was performed in the directory:
+Commands used during analysis of the F.oxysporum f.sp pisi genome. Note - all this work was performed in the directory:
 ```bash
 mkdir -p /home/groups/harrisonlab/project_files/fusarium_ex_pea
 cd /home/groups/harrisonlab/project_files/fusarium_ex_pea
 ```
+This makes a new directory in project files called fusarium_ex_pea and then changes directory to this new directory
+
 
 The following is a summary of the work presented in this Readme:
 Data organisation:
