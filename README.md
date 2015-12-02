@@ -10,8 +10,8 @@ Sclerotinia sclerotiorum
 
 Commands used during analysis of the Sclerotinia sclerotiorum genome. Note - all this work was performed in the directory:
 ```bash
-mkdir -p /home/groups/harrisonlab/project_files/Sclerotinia_spp
-cd /home/groups/harrisonlab/project_files/Sclerotinia_spp
+mkdir -p /home/groups/harrisonlab/project_files/fusarium_ex_pea
+cd /home/groups/harrisonlab/project_files/fusarium_ex_pea
 ```
 
 The following is a summary of the work presented in this Readme:
@@ -34,6 +34,16 @@ and annotation.
 
 
 ```bash
+RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/fusarium/HAPI_seq_3/
+ProjectDir=/home/groups/harrisonlab/project_files/fusarium_ex_pea
+mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG3/F
+mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG3/R
+mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG18/F
+mkdir -p $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG18/R
+cp $RawDatDir/FoxysporumPG3_S3_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG3/F/.
+cp $RawDatDir/FoxysporumPG3_S3_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG3/R/.
+cp $RawDatDir/FoxysporumPG18_S4_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG18/F/.
+cp $RawDatDir/FoxysporumPG18_S4_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG18/R/.
 ```
 
 
@@ -44,7 +54,11 @@ programs: fastqc fastq-mcf kmc
 Data quality was visualised using fastqc:
 
 ```bash
-
+for RawData in $(ls raw_dna/paired/*/*/*/*.fastq.gz); do
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+	echo $RawData;
+	qsub $ProgDir/run_fastqc.sh $RawData
+    done
 ```
 
 Trimming was performed on data to trim adapters from sequences and remove poor quality data.
@@ -52,7 +66,15 @@ This was done with fastq-mcf
 
 
 ```bash
-
+for StrainPath in $(ls -d raw_dna/paired/*/*); do
+        ProgDir=/home/jenkis/git_repos/tools/seq_tools/rna_qc
+        IlluminaAdapters=/home/jenkis/git_repos/tools/seq_tools/ncbi_adapters.fa
+        ReadsF=$(ls $StrainPath/F/*.fastq*)
+        ReadsR=$(ls $StrainPath/R/*.fastq*)
+        echo $ReadsF
+        echo $ReadsR
+        qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
+    done
 ```
 
 Data quality was visualised once again following trimming:
