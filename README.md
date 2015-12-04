@@ -80,7 +80,11 @@ for StrainPath in $(ls -d raw_dna/paired/*/*); do
 Data quality was visualised once again following trimming:
 
 ```bash
-
+for RawData in qc_dna/paired/*/*/*/*.fastq*; do
+        ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+        echo $RawData;
+        qsub $ProgDir/run_fastqc.sh $RawData
+    done
 ```
 
 
@@ -88,7 +92,14 @@ kmer counting was performed using kmc.
 This allowed estimation of sequencing depth and total genome size:
 
 ```bash
-
+for TrimPath in qc_dna/paired/*/*; do
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+		TrimF=$(ls $TrimPath/F/*.fq.gz)
+		TrimR=$(ls $TrimPath/F/*.fq.gz)
+		echo $TrimF
+		echo $TrimR
+		qsub $ProgDir/kmc_kmer_counting.sh $TrimF $TrimR
+    done
 ```
 
 ** Estimated Genome Size is:
