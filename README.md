@@ -61,6 +61,8 @@ for RawData in $(ls raw_dna/paired/*/*/*/*.fastq.gz); do
     done
 ```
 
+Can visualise this by navigating to the file in finder (after cluster mount on a new tab in terminal) and opening the file in the browser.
+
 Trimming was performed on data to trim adapters from sequences and remove poor quality data.
 This was done with fastq-mcf
 
@@ -77,7 +79,7 @@ for StrainPath in $(ls -d raw_dna/paired/*/*); do
     done
 ```
 
-Data quality was visualised once again following trimming:
+Data quality was visualised once again following trimming: (with the same fast qc programme as before)
 
 ```bash
 for RawData in qc_dna/paired/*/*/*/*.fastq*; do
@@ -113,6 +115,16 @@ A range of hash lengths were used and the best assembly selected for subsequent 
 
 
 ```bash
+for StrainPath in $(ls -d qc_dna/paired/*/*); do
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/spades
+Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
+Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
+F_Read=$(ls $StrainPath/F/*.fq.gz)
+R_Read=$(ls $StrainPath/R/*.fq.gz)
+OutDir=assembly/spades/$Organism/$Strain
+echo $F_Read
+echo $R_Read
+qsub $ProgDir/submit_SPAdes.sh $F_Read $R_Read $OutDir correct 10
 
 ```
 
