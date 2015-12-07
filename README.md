@@ -165,7 +165,8 @@ ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
 	qsub $ProgDir/sub_quast.sh $Assembly $OutDir
 done
 
-
+Run for PG3 with e.g:
+for Assembly in $(ls assembly/spades/*/PG3/filtered_contigs/*_500bp_renamed.fasta); do
 
 
 
@@ -197,8 +198,14 @@ Gene models were used to predict genes in the Neonectria genome. This used resul
 Quality of genome assemblies was assessed by looking for the gene space in the assemblies.
 
 ```bash
-
+for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+	ProgDir=/home/jenkis/git_repos/tools/gene_prediction/cegma
+	qsub $ProgDir/sub_cegma.sh $Assembly dna
+    done
 ```
+Results can be found in less gene_pred/cegma/fusarium_ex_pea/PG18/
+in completeness report
+
 
 ** Number of cegma genes present and complete:
 ** Number of cegma genes present and partial:
@@ -208,11 +215,49 @@ Quality of genome assemblies was assessed by looking for the gene space in the a
 Gene prediction was performed for the neonectria genome.
 CEGMA genes were used as Hints for the location of CDS.
 
-```bash
 
+###Gene prediction 1- Gene models predicted using Augustus
+
+```bash
+for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+	Strain=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+	Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+	OutDir=gene_pred/augustus/$Organism/$Strain
+	ProgDir=/home/jenkis/git_repos/tools/gene_prediction/augustus
+	GeneModel=fusarium
+	qsub $ProgDir/submit_augustus.sh $GeneModel $Assembly false $OutDir
+done
 ```
 
 ** Number of genes predicted:
+
+
+### Gene prediction 2- ORFs predicted following 6 frame translation 
+
+Open reading frame predictions were made using the ORF_finder.sh script as part of the path_pipe.sh pipeline. 
+This pipeline also identifies open reading frames containing Signal peptide sequences and RxLRs. 
+This pipeline was run with the following commands:
+
+```bash
+	ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
+	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+	qsub $ProgDir/run_ORF_finder.sh $Assembly
+done
+```
+
+The Gff files from the the ORF finder are not in true Gff3 format. This script converts gff files to true gff3 files that other programmes recognise. 
+These were corrected using the following commands:
+Cant run this until the ORF prediction above is finished. 
+
+```bash
+for ORF_Gff in $(ls gene_pred/ORF_finder/*/*/*_ORF.gff | grep -v '_atg_'); do
+    Strain=$(echo $ORF_Gff | rev | cut -f2 -d '/' | rev)
+    Organism=$(echo $ORF_Gff | rev | cut -f3 -d '/' | rev)
+    ProgDir=~/git_repos/tools/seq_tools/feature_annotation
+    ORF_Gff_mod=gene_pred/ORF_finder/$Organism/$Strain/"$Strain"_ORF_corrected.gff3
+    $ProgDir/gff_corrector.pl $ORF_Gff > $ORF_Gff_mod
+  done
+```
 
 #Functional annotation
 
@@ -234,7 +279,10 @@ The first analysis was based upon BLAST searches for genes known to be involved 
 Predicted gene models were searched against the PHIbase database using tBLASTx.
 
 ```bash
-
+	ProgDir=/home/jenkis/git_repos/tools/pathogen/blast
+	Query=../../phibase/v3.8/PHI_accessions.fa
+	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+	qsub $ProgDir/blast_pipe.sh $Query protein $Assembly
 ```
 
 Top BLAST hits were used to annotate gene models.
