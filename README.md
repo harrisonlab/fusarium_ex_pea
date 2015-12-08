@@ -261,17 +261,38 @@ for ORF_Gff in $(ls gene_pred/ORF_finder/*/*/*_ORF.gff | grep -v '_atg_'); do
 
 #Functional annotation
 
-Interproscan was used to give gene models functional annotations.
+Interproscan was used to give gene models functional annotations. Need to use screen function.
+open screen = screen -a
+exit but keeps it running= Ctrl A then D
+resume= screen -r
+terminate in screen= Ctrl D (use with caution!)
+
+Interproscan was used to give gene models functional annotations 
+```bash
+for Genes in $(ls gene_pred/augustus/*/*/*_EMR_singlestrand_aug_out.aa); do
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/interproscan
+	$ProgDir/sub_interproscan.sh $Genes
+done
+```
+Can test the command first using something like 
+```bash
+for Genes in $(ls gene_pred/augustus/*/*/*_EMR_singlestrand_aug_out.aa); do 
+echo $Genes
+cat $Genes |grep '>' | wc -l
+done
+```
+
+
+
+
+
+
 
 ```bash
 
 ```
 
-```bash
-
-```
-
-#Genomic analysis
+###Genomic analysis
 The first analysis was based upon BLAST searches for genes known to be involved in toxin production
 
 
@@ -290,6 +311,78 @@ Top BLAST hits were used to annotate gene models.
 ```bash
 
 ```
+
+
+#Signal peptide prediction
+
+## RxLR genes
+
+
+Proteins that were predicted to contain signal peptides were identified using
+the following commands:
+
+```bash
+for Proteome in $(ls gene_pred/augustus/*/*/*_EMR_singlestrand_aug_out.aa); do
+	SplitfileDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+	Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+	Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+	SplitDir=gene_pred/augustus_split/$Organism/$Strain
+	mkdir -p $SplitDir
+	BaseName="$Organism""_$Strain"_augustus_preds
+	$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
+	for File in $(ls $SplitDir/*_augustus_preds_*); do
+		Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
+		while [ $Jobs -ge 1 ]; do
+			sleep 10
+		printf "."
+		Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
+	done
+	printf "\n"
+	echo $File
+	#qsub $ProgDir/pred_sigP.sh $File
+	qsub $ProgDir/pred_sigP.sh $File signalp-4.1
+	done
+done
+```
+
+The batch files of predicted secreted proteins needed to be combined into a
+single file for each strain. This was done with the following commands:
+```bash
+	SplitDir=gene_pred/braker_split/P.cactorum/10300
+	Strain=$(echo $SplitDir | cut -d '/' -f4)
+	Organism=$(echo $SplitDir | cut -d '/' -f3)
+	InStringAA=''
+	InStringNeg=''
+	InStringTab=''
+	InStringTxt=''
+	SigpDir=braker_sigP
+	# SigpDir=braker_signalp-4.1
+	for GRP in $(ls -l $SplitDir/*_braker_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+		InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.aa";  
+		InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp_neg.aa";  
+		InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.tab";
+		InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.txt";  
+	done
+	cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
+	cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
+	tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
+	cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
+	# Headers=gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp_headers.txt
+	# ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
+	# BrakerGff=gene_pred/braker/P.cactorum/10300/P.cactorum/augustus.gff
+	# ExtractedGff=gene_pred/braker/P.cactorum/10300/P.cactorum/augustus_extracted.gff
+	# cat $BrakerGff | grep -v '#' > $ExtractedGff
+	# SigPGff=gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.gff
+	# cat gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa | grep '>' | tr -d '>' | cut -f1 -d ' ' > $Headers
+	# $ProgDir/gene_list_to_gff.pl $Headers $ExtractedGff SigP Name Augustus > $SigPGff
+```
+
+
+
+
+
+
 
 ** Blast results of note: **
   * 'Result A'
