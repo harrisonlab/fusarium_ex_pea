@@ -46,6 +46,30 @@ cp $RawDatDir/FoxysporumPG18_S4_L001_R1_001.fastq.gz $ProjectDir/raw_dna/paired/
 cp $RawDatDir/FoxysporumPG18_S4_L001_R2_001.fastq.gz $ProjectDir/raw_dna/paired/F.oxysporum_fsp_pisi/PG18/R/.
 ```
 
+This process was repeated for RNAseq data
+
+```bash
+RawDatDir=/home/groups/harrisonlab/raw_data/raw_seq/fusarium/rna_seq
+ProjectDir=/home/groups/harrisonlab/project_files/fusarium_ex_pea
+	mkdir -p $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDB/F
+	mkdir -p $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDB/R
+	mkdir -p $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_CzapekDox/F
+	mkdir -p $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_CzapekDox/R
+	mkdir -p $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_GlucosePeptone/F
+	mkdir -p $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_GlucosePeptone/R
+	mkdir -p $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDA/F
+	mkdir -p $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDA/R
+
+cp $RawDatDir/4_S1_L001_R1_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDB/F/.
+    cp $RawDatDir/4_S1_L001_R2_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDB/R/.
+    cp $RawDatDir/6_S2_L001_R1_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_CzapekDox/F/.
+    cp $RawDatDir/6_S2_L001_R2_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_CzapekDox/R/.
+    cp $RawDatDir/7_S3_L001_R1_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_GlucosePeptone/F/.
+    cp $RawDatDir/7_S3_L001_R2_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_GlucosePeptone/R/.
+    cp $RawDatDir/9_S4_L001_R1_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDA/F/.
+    cp $RawDatDir/9_S4_L001_R2_001.fastq.gz $ProjectDir/raw_rna/paired/F.oxysporum_fsp_cepae/Fus2_PDA/R/.
+
+
 
 #Data qc
 
@@ -323,59 +347,52 @@ the following commands:
 
 ```bash
 for Proteome in $(ls gene_pred/augustus/*/*/*_EMR_singlestrand_aug_out.aa); do
-	SplitfileDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
-	ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
-	Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-	Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-	SplitDir=gene_pred/augustus_split/$Organism/$Strain
-	mkdir -p $SplitDir
-	BaseName="$Organism""_$Strain"_augustus_preds
-	$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
-	for File in $(ls $SplitDir/*_augustus_preds_*); do
-		Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
-		while [ $Jobs -ge 1 ]; do
-			sleep 10
-		printf "."
-		Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
-	done
-	printf "\n"
-	echo $File
-	#qsub $ProgDir/pred_sigP.sh $File
-	qsub $ProgDir/pred_sigP.sh $File signalp-4.1
-	done
+SplitfileDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+SplitDir=gene_pred/augustus_split/$Organism/$Strain
+mkdir -p $SplitDir
+BaseName="$Organism""_$Strain"_augustus_preds
+$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
+for File in $(ls $SplitDir/*_augustus_preds_*); do
+Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
+while [ $Jobs -ge 1 ]; do
+sleep 10
+printf "."
+Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
+done
+printf "\n"
+echo $File
+#qsub $ProgDir/pred_sigP.sh $File
+qsub $ProgDir/pred_sigP.sh $File signalp-4.1
+done
 done
 ```
 
 The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
-	SplitDir=gene_pred/braker_split/P.cactorum/10300
-	Strain=$(echo $SplitDir | cut -d '/' -f4)
-	Organism=$(echo $SplitDir | cut -d '/' -f3)
-	InStringAA=''
-	InStringNeg=''
-	InStringTab=''
-	InStringTxt=''
-	SigpDir=braker_sigP
-	# SigpDir=braker_signalp-4.1
-	for GRP in $(ls -l $SplitDir/*_braker_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
-		InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.aa";  
-		InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp_neg.aa";  
-		InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.tab";
-		InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.txt";  
-	done
-	cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
-	cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
-	tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
-	cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
-	# Headers=gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp_headers.txt
-	# ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation
-	# BrakerGff=gene_pred/braker/P.cactorum/10300/P.cactorum/augustus.gff
-	# ExtractedGff=gene_pred/braker/P.cactorum/10300/P.cactorum/augustus_extracted.gff
-	# cat $BrakerGff | grep -v '#' > $ExtractedGff
-	# SigPGff=gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.gff
-	# cat gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa | grep '>' | tr -d '>' | cut -f1 -d ' ' > $Headers
-	# $ProgDir/gene_list_to_gff.pl $Headers $ExtractedGff SigP Name Augustus > $SigPGff
+for SplitDir in $(ls -d gene_pred/augustus_split/*/*); do
+Strain=$(echo $SplitDir | cut -d '/' -f4)
+Organism=$(echo $SplitDir | cut -d '/' -f3)
+InStringAA=''
+InStringNeg=''
+InStringTab=''
+InStringTxt=''
+SigpDir=augustus_signalp-4.1
+for GRP in $(ls -l $SplitDir/*_augustus_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.aa";  
+InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp_neg.aa";  
+InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.tab";
+InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_augustus_preds_$GRP""_sp.txt";  
+done
+cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
+cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
+tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
+cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
+done
+
 ```
 
 
