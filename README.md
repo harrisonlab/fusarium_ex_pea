@@ -305,10 +305,39 @@ echo $Genes
 cat $Genes |grep '>' | wc -l
 done
 ```
+When interprocan is finished you run this next set of commands
 
 
+THIS NEEDS TO BE EDITED FIRST- REMEMBER TO RUN
+```bash
+ProgDir=/home/gomeza/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
+    Genes=gene_pred/augustus/N.ditissima/R0905_v2/R0905_v2_EMR_aug_out.aa
+    InterProRaw=gene_pred/interproscan/N.ditissima/R0905_v2/raw
+    $ProgDir/append_interpro.sh $Genes $InterProRaw
+```
 
+#SwissProt
 
+Uses qlogin instead of qsub. It ran in screen because of time constraints. 
+
+```bash
+qlogin
+ProjDir=/home/groups/harrisonlab/project_files/fusarium_ex_pea
+cd $ProjDir
+for Protein in $(ls gene_pred/augustus/*/*/*_EMR_singlestrand_aug_out.aa); do
+Strain=$(echo $Protein | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Protein | rev | cut -f3 -d '/' | rev) 
+OutDir=$ProjDir/gene_pred/uniprot/$Organism/$Strain
+mkdir -p $OutDir
+blastp \
+-db /home/groups/harrisonlab/uniprot/swissprot/uniprot_sprot \
+-query $Protein
+-out $OutDir/swissprot_v2015_09_hits.tbl  \
+-evalue 1e-100 \
+-outfmt 6 \
+-num_threads 8 \
+-num_alignments 10
+```
 
 
 
@@ -319,15 +348,61 @@ done
 ###Genomic analysis
 The first analysis was based upon BLAST searches for genes known to be involved in toxin production
 
+##BLAST Searches
 
 ##Genes with homology to PHIbase
-Predicted gene models were searched against the PHIbase database using tBLASTx.
+Predicted gene models were searched against the PHIbase database using tBLASTx. All contents of PHI base database.
 
-```bash
+``bash
 	ProgDir=/home/jenkis/git_repos/tools/pathogen/blast
 	Query=../../phibase/v3.8/PHI_accessions.fa
 	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
 	qsub $ProgDir/blast_pipe.sh $Query protein $Assembly
+	done
+```
+
+Following blasting PHIbase to the genome, the hits were filtered by effect on virulence.
+
+The following commands were used to do this:
+
+for BlastHits in $(ls analysis/blast_homology/F.oxysporum_fsp_pisi/*/*_PHI_accessions.fa_homologs.csv); do 
+OutFile=$(echo $BlastHits | sed 's/.csv/_virulence.csv/g')
+paste -d '\t' ../../phibase/v3.8/PHI_headers.csv ../../phibase/v3.8/PHI_virulence.csv $BlastHits | cut -f-3,1185- > $OutFile
+cat $OutFile | grep 'contig' | cut -f2 | sort | uniq -c
+done
+
+A list of genes should appear- as an output. Can plot this as a histogram in excel. 
+
+
+
+
+##Identifying SIX genes
+
+Protein sequence of previously characterised SIX genes used to BLAST against
+assemlies.
+
+```bash
+	mkdir -p analysis/blast_homology/Fo_path_genes
+	cp ../fusarium/analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+	ProgDir=/home/jenkis/git_repos/tools/pathogen/blast
+	Query=analysis/blast_homology/Fo_path_genes/Fo_path_genes_CRX.fa
+	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+	echo $Assembly
+	qsub $ProgDir/blast_pipe.sh $Query dna $Assembly
+	done
+```
+
+Once blast searches had completed, the BLAST hits were converted to GFF annotations:
+
+```bash
+
+	ProgDir=/home/jenkis/git_repos/tools/pathogen/blast
+	for BlastHits in $(ls analysis/blast_homology/F.oxysporum_fsp_pisi/*/*_Fo_path_genes_CRX.fa_homologs.csv); do 
+	HitsGff=$(echo $BlastHits | sed 's/csv/gff/g')
+	Column2=SIX_homolog
+	NumHits=5
+	$ProgDir/blast2gff.pl $Column2 $NumHits $BlastHits > $HitsGff
+	done
 ```
 
 Top BLAST hits were used to annotate gene models.
@@ -346,27 +421,27 @@ Proteins that were predicted to contain signal peptides were identified using
 the following commands:
 
 ```bash
-for Proteome in $(ls gene_pred/augustus/*/*/*_EMR_singlestrand_aug_out.aa); do
-SplitfileDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
-Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
-Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-SplitDir=gene_pred/augustus_split/$Organism/$Strain
-mkdir -p $SplitDir
-BaseName="$Organism""_$Strain"_augustus_preds
-$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
-for File in $(ls $SplitDir/*_augustus_preds_*); do
-Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
-while [ $Jobs -ge 1 ]; do
-sleep 10
-printf "."
-Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
-done
-printf "\n"
-echo $File
-#qsub $ProgDir/pred_sigP.sh $File
-qsub $ProgDir/pred_sigP.sh $File signalp-4.1
-done
+	for Proteome in $(ls gene_pred/augustus/*/*/*_EMR_singlestrand_aug_out.aa); do
+	SplitfileDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+	Strain=$(echo $Proteome | rev | cut -f2 -d '/' | rev)
+	Organism=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+	SplitDir=gene_pred/augustus_split/$Organism/$Strain
+	mkdir -p $SplitDir
+	BaseName="$Organism""_$Strain"_augustus_preds
+	$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
+	for File in $(ls $SplitDir/*_augustus_preds_*); do
+	Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
+	while [ $Jobs -ge 1 ]; do
+	sleep 10
+	printf "."
+	Jobs=$(qstat | grep 'pred_sigP' | grep 'qw' | wc -l)
+	done
+	printf "\n"
+	echo $File
+	#qsub $ProgDir/pred_sigP.sh $File
+	qsub $ProgDir/pred_sigP.sh $File signalp-4.1
+	done
 done
 ```
 
