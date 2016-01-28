@@ -275,13 +275,15 @@ Cant run this until the ORF prediction above is finished.
 
 ```bash
 for ORF_Gff in $(ls gene_pred/ORF_finder/*/*/*_ORF.gff | grep -v '_atg_'); do
-    Strain=$(echo $ORF_Gff | rev | cut -f2 -d '/' | rev)
-    Organism=$(echo $ORF_Gff | rev | cut -f3 -d '/' | rev)
-    ProgDir=~/git_repos/tools/seq_tools/feature_annotation
-    ORF_Gff_mod=gene_pred/ORF_finder/$Organism/$Strain/"$Strain"_ORF_corrected.gff3
-    $ProgDir/gff_corrector.pl $ORF_Gff > $ORF_Gff_mod
+	Strain=$(echo $ORF_Gff | rev | cut -f2 -d '/' | rev)
+	Organism=$(echo $ORF_Gff | rev | cut -f3 -d '/' | rev)
+	ProgDir=~/git_repos/tools/seq_tools/feature_annotation
+	ORF_Gff_mod=gene_pred/ORF_finder/$Organism/$Strain/"$Strain"_ORF_corrected.gff3
+	$ProgDir/gff_corrector.pl $ORF_Gff > $ORF_Gff_mod
   done
 ```
+After this you can view this find in genious. It will show predicted open reading frames. 
+
 
 #Functional annotation
 
@@ -305,15 +307,19 @@ echo $Genes
 cat $Genes |grep '>' | wc -l
 done
 ```
-When interprocan is finished you run this next set of commands
+When interprocan is finished you run this next set of commands to rejoin all the split files. Where are the outputs and what do we do with them.
 
 
-THIS NEEDS TO BE EDITED FIRST- REMEMBER TO RUN
 ```bash
-ProgDir=/home/gomeza/git_repos/emr_repos/tools/seq_tools/feature_annotation/interproscan
-    Genes=gene_pred/augustus/N.ditissima/R0905_v2/R0905_v2_EMR_aug_out.aa
-    InterProRaw=gene_pred/interproscan/N.ditissima/R0905_v2/raw
-    $ProgDir/append_interpro.sh $Genes $InterProRaw
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/interproscan
+for Genes in $(ls gene_pred/interproscan/*/*/*_EMR_singlestrand_aug_out.aa_split_*.fa); do
+Strain=$(echo $Genes | rev | cut -f2 -d '/'| rev)
+Organism=$(echo $Genes | rev | cut -f3 -d '/'| rev)
+InterProRaw=gene_pred/interproscan/$Organism/$Strain/raw
+$ProgDir/append_interpro.sh $Genes $InterProRaw
+done
+	
+   
 ```
 
 #SwissProt
@@ -365,11 +371,13 @@ Following blasting PHIbase to the genome, the hits were filtered by effect on vi
 
 The following commands were used to do this:
 
+```bash
 for BlastHits in $(ls analysis/blast_homology/F.oxysporum_fsp_pisi/*/*_PHI_accessions.fa_homologs.csv); do 
 OutFile=$(echo $BlastHits | sed 's/.csv/_virulence.csv/g')
 paste -d '\t' ../../phibase/v3.8/PHI_headers.csv ../../phibase/v3.8/PHI_virulence.csv $BlastHits | cut -f-3,1185- > $OutFile
 cat $OutFile | grep 'contig' | cut -f2 | sort | uniq -c
 done
+```
 
 A list of genes should appear- as an output. Can plot this as a histogram in excel. 
 
@@ -414,8 +422,6 @@ Top BLAST hits were used to annotate gene models.
 
 #Signal peptide prediction
 
-## RxLR genes
-
 
 Proteins that were predicted to contain signal peptides were identified using
 the following commands:
@@ -449,8 +455,8 @@ The batch files of predicted secreted proteins needed to be combined into a
 single file for each strain. This was done with the following commands:
 ```bash
 for SplitDir in $(ls -d gene_pred/augustus_split/*/*); do
-Strain=$(echo $SplitDir | cut -d '/' -f4)
-Organism=$(echo $SplitDir | cut -d '/' -f3)
+Strain=$(echo $SplitDir | cut -d '/' -f3)
+Organism=$(echo $SplitDir | cut -d '/' -f4)
 InStringAA=''
 InStringNeg=''
 InStringTab=''
