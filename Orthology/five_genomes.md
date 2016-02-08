@@ -98,34 +98,47 @@ Taxon_code=Fon1
 	done
 ```
 
-RUN ALL OF THESE WHEN THE ABOVE IS DONE
+
 Have to set the isolate abbreviations again if you have logged out. Should have remembered if use same screen
+
 
 # Merge the all-vs-all blast results  
 ```bash  
-  MergeHits="$IsolateAbrv"_blast.tab
-  printf "" > $MergeHits
-  for Num in $(ls $WorkDir/splitfiles/*.tab | rev | cut -f1 -d '_' | rev | sort -n); do
-    File=$(ls $WorkDir/splitfiles/*_$Num)
-    cat $File
-  done > $MergeHits
+MergeHits=$WorkDir/"$IsolateAbrv"_blast.tab
+printf "" > $MergeHits
+for Num in $(ls $WorkDir/splitfiles/*.tab | rev | cut -f1 -d '_' | rev | sort -n); do
+File=$(ls $WorkDir/splitfiles/*_$Num)
+cat $File
+done > $MergeHits
 ```
 
 ## Perform ortholog identification
 
 ```bash
-  ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/orthoMCL
-  MergeHits="$IsolateAbrv"_blast.tab
-  GoodProts=$WorkDir/goodProteins/goodProteins.fasta
-  qsub $ProgDir/qsub_orthomcl.sh $MergeHits $GoodProts
+ProgDir=~/git_repos/tools/pathogen/orthology/orthoMCL
+MergeHits=$WorkDir/"$IsolateAbrv"_blast.tab
+GoodProts=$WorkDir/goodProteins/goodProteins.fasta
+qsub $ProgDir/qsub_orthomcl.sh $MergeHits $GoodProts
 ```
+In above script we added in $WorkDir after MergeHits so it should output the file in the location set in WorkDir.
+
+
+
+Done to here
 
 ## Plot venn diagrams:
 
 ```bash
-  ProgDir=~/git_repos/emr_repos/tools/pathogen/orthology/venn_diagrams
-  $ProgDir/ven_diag_5_way.R --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
+ProgDir=~/git_repos/tools/pathogen/orthology/venn_diagrams
+$ProgDir/ven_diag_5_way.R --inp $WorkDir/"$IsolateAbrv"_orthogroups.tab --out $WorkDir/"$IsolateAbrv"_orthogroups.pdf
 ```
+
+Tried script above but it gave the error message:
+Error in library(optparse) : there is no package called ‘optparse’
+Execution halted
+
+
+
 
 Output was a pdf file of the venn diagram.
 
