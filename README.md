@@ -360,9 +360,9 @@ The first analysis was based upon BLAST searches for genes known to be involved 
 Predicted gene models were searched against the PHIbase database using tBLASTx. All contents of PHI base database.
 
 ``bash
+for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
 	ProgDir=/home/jenkis/git_repos/tools/pathogen/blast
 	Query=../../phibase/v3.8/PHI_accessions.fa
-	for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
 	qsub $ProgDir/blast_pipe.sh $Query protein $Assembly
 	done
 ```
