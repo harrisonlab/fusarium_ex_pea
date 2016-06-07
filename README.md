@@ -69,3 +69,21 @@ The output for this is into the same location that the raw file came from, so e.
 
 Can visualise this by navigating to the file in finder (after cluster mount on a new tab in terminal) and opening the html file in the browser.
 
+
+##Data Trimming
+
+Trimming was performed on data to trim adapters from sequences and remove poor quality data.
+This was done with fastq-mcf
+
+
+```bash
+for StrainPath in $(ls -d raw_dna/paired/*/*); do
+        ProgDir=/home/jenkis/git_repos/tools/seq_tools/rna_qc
+        IlluminaAdapters=/home/jenkis/git_repos/tools/seq_tools/ncbi_adapters.fa
+        ReadsF=$(ls $StrainPath/F/*.fastq*)
+        ReadsR=$(ls $StrainPath/R/*.fastq*)
+        echo $ReadsF
+        echo $ReadsR
+        qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
+    done
+```
