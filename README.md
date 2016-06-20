@@ -78,12 +78,31 @@ This was done with fastq-mcf
 
 ```bash
 for StrainPath in $(ls -d raw_dna/paired/*/*); do
-        ProgDir=/home/jenkis/git_repos/tools/seq_tools/rna_qc
-        IlluminaAdapters=/home/jenkis/git_repos/tools/seq_tools/ncbi_adapters.fa
-        ReadsF=$(ls $StrainPath/F/*.fastq*)
-        ReadsR=$(ls $StrainPath/R/*.fastq*)
-        echo $ReadsF
-        echo $ReadsR
-        qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/rna_qc
+		IlluminaAdapters=/home/jenkis/git_repos/tools/seq_tools/ncbi_adapters.fa
+		ReadsF=$(ls $StrainPath/F/*.fastq*)
+		ReadsR=$(ls $StrainPath/R/*.fastq*)
+		echo $ReadsF
+		echo $ReadsR
+		qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
     done
 ```
+
+This trims off the adapters from the fastq.gz file in raw_dna/paired/FOP1/F etc directories
+
+Fastqc was performed again to visualise the quality of the data following trimming (using the same script as before):
+
+Data quality was visualised once again following trimming: (with the same fast qc programme as before)
+
+```bash
+for RawData in qc_dna/paired/*/*/*/*.fastq*; do
+        ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+        echo $RawData;
+        qsub $ProgDir/run_fastqc.sh $RawData
+    done
+```
+
+
+
+
+
