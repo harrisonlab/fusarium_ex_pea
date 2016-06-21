@@ -117,5 +117,28 @@ for TrimPath in qc_dna/paired/*/*; do
     done
 ```
 
+Script ran- not sure where the estimated coverage and genome size comes from?
+
+
+#Assembly
+Assembly was performed using: SPAdes
+
+A range of hash lengths were used and the best assembly selected for subsequent analysis
+
+
+```bash
+for StrainPath in $(ls -d qc_dna/paired/*/*); do
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/spades
+		Strain=$(echo $StrainPath | rev | cut -f1 -d '/' | rev)
+		Organism=$(echo $StrainPath | rev | cut -f2 -d '/' | rev)
+		F_Read=$(ls $StrainPath/F/*.fq.gz)
+		R_Read=$(ls $StrainPath/R/*.fq.gz)
+		OutDir=assembly/spades/$Organism/$Strain
+		echo $F_Read
+		echo $R_Read
+	qsub $ProgDir/submit_SPAdes.sh $F_Read $R_Read $OutDir correct 10
+done
+```
+
 
 
