@@ -90,19 +90,32 @@ for StrainPath in $(ls -d raw_dna/paired/*/*); do
 
 This trims off the adapters from the fastq.gz file in raw_dna/paired/FOP1/F etc directories
 
+
 Fastqc was performed again to visualise the quality of the data following trimming (using the same script as before):
 
 Data quality was visualised once again following trimming: (with the same fast qc programme as before)
 
 ```bash
-for RawData in qc_dna/paired/*/*/*/*.fastq*; do
-        ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
-        echo $RawData;
-        qsub $ProgDir/run_fastqc.sh $RawData
+for RawData in qc_dna/paired/*/*/*/*.fq.gz; do
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+		echo $RawData;
+		qsub $ProgDir/run_fastqc.sh $RawData
     done
 ```
 
+##kmer counting was performed using kmc.
+This allowed estimation of sequencing depth and total genome size:
 
+```bash
+for TrimPath in qc_dna/paired/*/*; do
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+		TrimF=$(ls $TrimPath/F/*.fq.gz)
+		TrimR=$(ls $TrimPath/R/*.fq.gz)
+		echo $TrimF
+		echo $TrimR
+		qsub $ProgDir/kmc_kmer_counting.sh $TrimF $TrimR
+    done
+```
 
 
 
