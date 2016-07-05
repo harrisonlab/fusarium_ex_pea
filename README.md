@@ -140,5 +140,67 @@ for StrainPath in $(ls -d qc_dna/paired/*/*); do
 done
 ```
 
+Assembly stats can be visualised after running Quast. 
+
+But first you need to remove contaminants and change the headers to contigs.
+ 
+ 
+#Removing contaminants- changing headers to contigs
+
+This changes headers from Nodes to contigs in the fasta file and renames the file. 
+
+```bash
+for OutDir in $(ls -d assembly/spades/*/*/filtered_contigs); do
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+		AssFiltered=$OutDir/contigs_min_500bp.fasta
+		AssRenamed=$OutDir/contigs_min_500bp_renamed.fasta
+		echo $AssFiltered
+		printf '.\t.\t.\t.\n' > editfile.tab
+		$ProgDir/remove_contaminants.py --inp $AssFiltered --out $AssRenamed --coord_file editfile.tab
+		rm editfile.tab
+	done
+```
+
+
+#Quast 
+
+Tools used to summarise assembly statistics- to do with submission of genome to NCBI.
+
+```bash
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		for Assembly in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+		Strain=$(echo $Assembly | rev | cut -d '/' -f3 | rev)
+		Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+		OutDir=assembly/spades/$Organism/$Strain/filtered_contigs
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
+```
+
+For future reference these report stats can be found in e.g. less assembly/spades/F.oxysporum_fsp_pisi/PG18/filtered_contigs/report.txt
+
+Can note down assembly stats in an Excel file or txt file. 
+
+
+
+# Repeat masking
+Repeat masking was performed and used the following programs: Repeatmasker Repeatmodeler
+
+The best assembly was used to perform repeatmasking
+
+```bash
+ProgDir=/home/adamst/git_repos/tools/seq_tools/repeat_masking
+for BestAss in $(ls assembly/spades/*/*/filtered_contigs/*_500bp_renamed.fasta); do
+		echo $BestAss
+		qsub $ProgDir/rep_modeling.sh $BestAss
+		qsub $ProgDir/transposonPSI.sh $BestAss
+	done
+ ```
+Takes like 24 hours
+
+ 
+
+
+
+
 
 
