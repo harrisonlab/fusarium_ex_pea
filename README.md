@@ -279,10 +279,105 @@ Results can be found in: e.g/  less gene_pred/cegma/fusarium_ex_pea/PG18/
 Look for the in completeness report
 
 
-** Number of cegma genes present and complete:
-** Number of cegma genes present and partial:
+Output were summarised using the commands:
 
-NOT RAN PAST HERE- CHECK BEFORE
+```bash
+for File in $(ls gene_pred/cegma/*/*/*_dna_cegma.completeness_report); do
+		Strain=$(echo $File | rev | cut -f2 -d '/' | rev);
+		Species=$(echo $File | rev | cut -f3 -d '/' | rev);
+		printf "$Species\t$Strain\n";
+		cat $File | head -n18 | tail -n+4;printf "\n";
+	done > gene_pred/cegma/cegma_results_dna_summary.txt
+```
+To view: 
+
+less gene_pred/cegma/cegma_results_dna_summary.txt
+
+F.oxysporum_fsp_pisi	FOP1
+              #Prots  %Completeness  -  #Total  Average  %Ortho 
+
+  Complete      238       95.97      -   282     1.18     11.76
+
+   Group 1       61       92.42      -    71     1.16     11.48
+   Group 2       54       96.43      -    62     1.15     11.11
+   Group 3       58       95.08      -    75     1.29     15.52
+   Group 4       65      100.00      -    74     1.14      9.23
+
+   Partial      243       97.98      -   297     1.22     14.81
+
+   Group 1       64       96.97      -    74     1.16     10.94
+   Group 2       55       98.21      -    65     1.18     14.55
+   Group 3       59       96.72      -    81     1.37     23.73
+   Group 4       65      100.00      -    77     1.18     10.77
+
+F.oxysporum_fsp_pisi	FOP2
+              #Prots  %Completeness  -  #Total  Average  %Ortho 
+
+  Complete      236       95.16      -   283     1.20     11.86
+
+   Group 1       60       90.91      -    71     1.18     11.67
+   Group 2       53       94.64      -    61     1.15      7.55
+   Group 3       58       95.08      -    79     1.36     20.69
+   Group 4       65      100.00      -    72     1.11      7.69
+
+   Partial      241       97.18      -   294     1.22     13.28
+
+   Group 1       63       95.45      -    75     1.19     11.11
+   Group 2       54       96.43      -    64     1.19     11.11
+   Group 3       59       96.72      -    80     1.36     20.34
+   Group 4       65      100.00      -    75     1.15     10.77
+
+F.oxysporum_fsp_pisi	FOP5
+              #Prots  %Completeness  -  #Total  Average  %Ortho 
+
+  Complete      241       97.18      -   277     1.15     10.37
+
+   Group 1       62       93.94      -    74     1.19     11.29
+   Group 2       54       96.43      -    59     1.09      7.41
+   Group 3       61      100.00      -    76     1.25     16.39
+   Group 4       64       98.46      -    68     1.06      6.25
+
+   Partial      244       98.39      -   290     1.19     12.70
+
+   Group 1       64       96.97      -    76     1.19     10.94
+   Group 2       55       98.21      -    62     1.13     10.91
+   Group 3       61      100.00      -    81     1.33     21.31
+   Group 4       64       98.46      -    71     1.11      7.81
+
+F.oxysporum_fsp_pisi	PG18
+              #Prots  %Completeness  -  #Total  Average  %Ortho 
+
+  Complete      242       97.58      -   295     1.22     15.70
+
+   Group 1       62       93.94      -    75     1.21     12.90
+   Group 2       54       96.43      -    63     1.17     12.96
+   Group 3       61      100.00      -    79     1.30     22.95
+   Group 4       65      100.00      -    78     1.20     13.85
+
+   Partial      246       99.19      -   311     1.26     18.70
+
+   Group 1       65       98.48      -    79     1.22     12.31
+   Group 2       55       98.21      -    67     1.22     18.18
+   Group 3       61      100.00      -    81     1.33     24.59
+   Group 4       65      100.00      -    84     1.29     20.00
+
+F.oxysporum_fsp_pisi	PG3
+              #Prots  %Completeness  -  #Total  Average  %Ortho 
+
+  Complete      241       97.18      -   288     1.20     12.86
+
+   Group 1       62       93.94      -    73     1.18     12.90
+   Group 2       54       96.43      -    63     1.17     14.81
+   Group 3       60       98.36      -    81     1.35     18.33
+   Group 4       65      100.00      -    71     1.09      6.15
+
+   Partial      245       98.79      -   300     1.22     15.10
+
+   Group 1       65       98.48      -    76     1.17     12.31
+   Group 2       55       98.21      -    66     1.20     18.18
+   Group 3       60       98.36      -    85     1.42     21.67
+   Group 4       65      100.00      -    73     1.12      9.23
+
 
 
 
@@ -297,13 +392,94 @@ qc of RNA seq data is detailed below:
 
 ```bash
 for Folder in $(ls -d ../fusarium/raw_rna/paired/F.oxysporum_fsp_cepae/*); do
-     FolderName=$(echo $Folder | rev | cut -f1 -d '/' | rev);
-     echo $FolderName;
-     ls $Folder/F;
-     ls $Folder/R;
-    done
+FolderName=$(echo $Folder | rev | cut -f1 -d '/' | rev);
+echo $FolderName;
+ls $Folder/F;
+ls $Folder/R;
+done
 ```
+Results here for ^ commands:
 
+55_72hrs_rep1
+sample013_1.combined.fastq.gz
+sample013_2.combined.fastq.gz
+55_72hrs_rep2
+sample014_1.combined.fastq.gz
+sample014_2.combined.fastq.gz
+55_72hrs_rep3
+sample015_1.combined.fastq.gz
+sample015_2.combined.fastq.gz
+control_72hrs_rep1
+sample002_1.combined.fastq.gz
+sample002_2.combined.fastq.gz
+control_72hrs_rep2
+sample004_1.combined.fastq.gz
+sample004_2.combined.fastq.gz
+control_72hrs_rep3
+sample005_1.combined.fastq.gz
+sample005_2.combined.fastq.gz
+FO47_72hrs_rep1
+sample006_1.combined.fastq.gz
+sample006_2.combined.fastq.gz
+FO47_72hrs_rep2
+sample007_1.combined.fastq.gz
+sample007_2.combined.fastq.gz
+FO47_72hrs_rep3
+sample012_1.combined.fastq.gz
+sample012_2.combined.fastq.gz
+Fus2_0hrs_prelim
+1_S1_L001_R1_001.fastq.gz
+1_S1_L001_R2_001.fastq.gz
+Fus2_16hrs_prelim
+3_S2_L001_R1_001.fastq.gz
+3_S2_L001_R2_001.fastq.gz
+Fus2_24hrs_prelim_rep1
+4_S3_L001_R1_001.fastq.gz
+4_S3_L001_R2_001.fastq.gz
+Fus2_24hrs_prelim_rep2
+Fus2_36hrs_prelim
+36hr-root_S10_L001_R1_001.fastq.gz
+36hr-root_S10_L001_R2_001.fastq.gz
+Fus2_48hrs_prelim
+6_S4_L001_R1_001.fastq.gz
+6_S4_L001_R2_001.fastq.gz
+Fus2_4hrs_prelim
+4hr-root_S7_L001_R1_001.fastq.gz
+4hr-root_S7_L001_R2_001.fastq.gz
+Fus2_72hrs_prelim
+7_S5_L001_R1_001.fastq.gz
+7_S5_L001_R2_001.fastq.gz
+Fus2_72hrs_rep1
+sample016_1.combined.fastq.gz
+sample016_2.combined.fastq.gz
+Fus2_72hrs_rep2
+sample018_1.combined.fastq.gz
+sample018_2.combined.fastq.gz
+Fus2_72hrs_rep3
+sample019_1.combined.fastq.gz
+sample019_2.combined.fastq.gz
+Fus2_8hrs_prelim
+8hr-root_S8_L001_R1_001.fastq.gz
+8hr-root_S8_L001_R2_001.fastq.gz
+Fus2_96hrs_prelim
+8_S6_L001_R1_001.fastq.gz
+8_S6_L001_R2_001.fastq.gz
+Fus2_CzapekDox
+6_S2_L001_R1_001_fastqc  6_S2_L001_R1_001.fastq.gz
+6_S2_L001_R2_001_fastqc  6_S2_L001_R2_001.fastq.gz
+Fus2_GlucosePeptone
+7_S3_L001_R1_001_fastqc  7_S3_L001_R1_001.fastq.gz
+7_S3_L001_R2_001_fastqc  7_S3_L001_R2_001.fastq.gz
+Fus2_PDA
+9_S4_L001_R1_001_fastqc  9_S4_L001_R1_001.fastq.gz
+9_S4_L001_R2_001_fastqc  9_S4_L001_R2_001.fastq.gz
+Fus2_PDB
+4_S1_L001_R1_001_fastqc  4_S1_L001_R1_001.fastq.gz
+4_S1_L001_R2_001_fastqc  4_S1_L001_R2_001.fastq.gz
+
+
+
+... if doing this with my own RNAseq data there would be additional steps here between these 2 commands. 
 
 Then Rnaseq data was aligned to each genome assembly:
 
@@ -326,7 +502,7 @@ for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
                 Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
             done
             printf "\n"
-            ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/RNAseq
+            ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
             qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir $InsertGap $InsertStdDev
         done
     done
