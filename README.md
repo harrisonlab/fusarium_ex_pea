@@ -507,6 +507,7 @@ for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
         done
     done
 
+This has been submitted. Check results 
 
 ...........................................................................................
 NOTES FROM SKYPE
