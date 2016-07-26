@@ -507,6 +507,15 @@ for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
         done
     done
 
+ran again without: (as it stopped running when I quit terminal)
+
+Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+            while [ $Jobs -gt 1 ]; do
+                sleep 10
+                printf "."
+                Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
+            done
+
 This has been submitted. Check results 
 
 ...........................................................................................
