@@ -3,7 +3,8 @@ Commands used in the analysis of Fusarium oxysporum isolates ex. pea
 
 To update profiles in future:
 
-cp /home/armita/generic_profiles/2016-07-12/.generic_profile ~/.profile
+cp /home/armita/generic_profiles/2016-07-28/.generic_profile ~/.profile
+
 
 (change the dates for future updates)
 
@@ -483,6 +484,7 @@ Fus2_PDB
 
 Then Rnaseq data was aligned to each genome assembly:
 
+```bash
 for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
         Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
         Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
@@ -506,6 +508,7 @@ for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
             qsub $ProgDir/tophat_alignment.sh $Assembly $FileF $FileR $OutDir $InsertGap $InsertStdDev
         done
     done
+```
 
 ran again without: (as it stopped running when I quit terminal)
 
@@ -516,7 +519,88 @@ Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
                 Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
             done
 
-This has been submitted. Check results 
+
+
+
+Up until now we have been using just the repeatmasker/repeatmodeller fasta file when we have used softmasked fasta files. You can merge in transposonPSI masked sites using the following command:
+
+```bash  
+  for File in $(ls repeat_masked/*/*/filtered_contigs_repmask/*_contigs_softmasked.fa); do
+        OutDir=$(dirname $File)
+        TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+        OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+        bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+        echo "$OutFile"
+        echo "Number of masked bases:"
+        cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+    done
+    
+    
+repeat_masked/F.oxysporum_fsp_pisi/FOP1/filtered_contigs_repmask/FOP1_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+8415943
+repeat_masked/F.oxysporum_fsp_pisi/FOP2/filtered_contigs_repmask/FOP2_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+4972874
+repeat_masked/F.oxysporum_fsp_pisi/FOP5/filtered_contigs_repmask/FOP5_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+4180881
+repeat_masked/F.oxysporum_fsp_pisi/PG18/filtered_contigs_repmask/PG18_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+5575676
+repeat_masked/F.oxysporum_fsp_pisi/PG3/filtered_contigs_repmask/PG3_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+5170668
+
+
+
+
+
+#Braker prediction 
+
+Before braker predictiction was performed, I double checked that I had the genemark key in my user area and copied it over from the genemark install directory:
+
+```bash
+    ls ~/.gm_key
+    cp /home/armita/prog/genemark/gm_key_64 ~/.gm_key
+```
+
+
+DONE up to here.
+
+
+```bash
+for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
+    printf "\n"
+    Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+    echo "$Organism - $Strain"
+    mkdir -p alignment/$Organism/$Strain/concatenated
+    samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
+    alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
+    alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
+    alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
+    alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
+    alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
+    alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
+    alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
+    alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
+    alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
+    alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
+    alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
+    alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
+    OutDir=gene_pred/braker/$Organism/"$Strain"_braker
+    AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
+    GeneModelName="$Organism"_"$Strain"_braker
+    ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
+    qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+    done
+```
+      
+
+
+
+
 
 ...........................................................................................
 NOTES FROM SKYPE
