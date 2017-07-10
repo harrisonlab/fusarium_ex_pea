@@ -1,4 +1,4 @@
-# Fusarium f.sp. pisi (PacBio Sequences)
+# Fusarium oxysporum f.sp. pisi (PacBio Sequences)
 Commands used for the analysis of F.oxysporum f.sp pisi sequences from PacBio
 
 
