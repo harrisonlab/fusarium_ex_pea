@@ -14,3 +14,15 @@ less ~/.profile
 OR
 cd /home/armita
 less .profile
+
+
+
+You will find your files in
+
+ls /home/miseq_data/pacbio/2017/John_Clarkson_UWAR.JC.ENQ-1929
+
+and your seqs are:
+
+S1 (FOP1) = Fusarium oxysporum f.sp. pisi
+S2 (FOP2) = Fusarium oxysporum f.sp. pisi
+S3R1 (FOP5) = Fusarium oxysporum f.sp. pisi
