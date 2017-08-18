@@ -1,5 +1,5 @@
 # Fusarium oxysporum f.sp. pisi (PacBio Sequences)
-##Commands used for the analysis of F.oxysporum f.sp pisi sequences from PacBio
+## Commands used for the analysis of F.oxysporum f.sp pisi sequences from PacBio
 
 
 	cp /home/armita/generic_profiles/2016-07-28/.generic_profile ~/.profile
@@ -110,7 +110,7 @@ FOP1 concatenated
 
 **No fastq files or h5 files in John_Clarkson_UWAR.JC.ENQ-1929_S1.tar.gz **
 
-##Canu Assembly 
+## Canu Assembly 
 
 FOP2 assembly
 
