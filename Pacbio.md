@@ -104,11 +104,16 @@ FOP1 concatenated
 	ReadSet=$(echo $H5_File | rev | cut -f3 -d '/' | rev)
 	bash5tools.py $H5_File --outFile $OutDir/FOP1_pacbio_$ReadSet --outType fastq --readType unrolled --minLength 100
 	done
-	cat raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1/*/raw_reads/*/Analysis_Results/*.subreads.fastq > $OutDir/concatenated_pacbio.fastq
+	cat raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1/*/*/Analysis_Results/*.subreads.fastq > $OutDir/concatenated_pacbio.fastq
 ```
+*had to change the file structure in last line:
+From:  raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1/*/raw_reads/*/Analysis_Results/*.subreads.fastq
+To:  raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1/*/*/Analysis_Results/*.subreads.fastq
 
 
 **No fastq files or h5 files in John_Clarkson_UWAR.JC.ENQ-1929_S1.tar.gz **
+
+
 
 ## Canu Assembly 
 
@@ -138,25 +143,65 @@ FOP5 assembly
   	qsub $ProgDir/submit_canu.sh $Reads $GenomeSz $Prefix $OutDir
 ``` 
   
-FOP1 assembly
+FOP1 assembly  
 
 ```bash
 	Reads=$(ls raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1/extracted/concatenated_pacbio.fastq)
-  	GenomeSz="50m"
-  	Strain=$(echo $Reads | rev | cut -f3 -d '/' | rev)
-  	Organism=$(echo $Reads | rev | cut -f4 -d '/' | rev)
-  	Prefix="$Strain"_canu
-  	OutDir="assembly/canu-1.3/$Organism/$Strain"_canu
-  	ProgDir=~/git_repos/tools/seq_tools/assemblers/canu
-  	qsub $ProgDir/submit_canu.sh $Reads $GenomeSz $Prefix $OutDir
+	GenomeSz="50m"
+	Strain=$(echo $Reads | rev | cut -f3 -d '/' | rev)
+	Organism=$(echo $Reads | rev | cut -f4 -d '/' | rev)
+	Prefix="$Strain"_canu
+	OutDir="assembly/canu-1.3/$Organism/$Strain"_canu
+	ProgDir=~/git_repos/tools/seq_tools/assemblers/canu
+	qsub $ProgDir/submit_canu.sh $Reads $GenomeSz $Prefix $OutDir
 ```
 
 
 
+# Assembly stats were collected using quast 
+
+FOP2
+
+```bash
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		for Assembly in $(ls assembly/canu-1.3/*/FOP2_canu/*_canu.contigs.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+		OutDir=assembly/canu-1.3/$Organism/$Strain/filtered_contigs
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
+```
+
+FOP5
+
+```bash
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		for Assembly in $(ls assembly/canu-1.3/*/FOP5_canu/*_canu.contigs.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+		OutDir=assembly/canu-1.3/$Organism/$Strain/filtered_contigs
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
+```
+
+FOP1 - check complete
+
+```bash
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		for Assembly in $(ls assembly/canu-1.3/*/FOP1_canu/*_canu.contigs.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+		OutDir=assembly/canu-1.3/$Organism/$Strain/filtered_contigs
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
+```
+
+LOOK AT ASSEMBLY STATS!
+
 NEED TO DO-- CHANGE
 Assemblies were polished using Pilon- for all of them
 
-  for Assembly in $(ls assembly/canu/*/Fus2/edited_contigs/*_canu_contigs_modified.fasta); do
+  for Assembly in $(ls assembly/canu-1.3/*/FOP2_canu/FOP2_canu.contigs.fasta); do
     Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
     Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
     IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
