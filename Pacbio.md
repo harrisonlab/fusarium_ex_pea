@@ -158,7 +158,7 @@ FOP1 assembly
 
 
 
-# Assembly stats were collected using quast 
+## Assembly stats were collected using quast 
 
 FOP2
 
@@ -184,7 +184,7 @@ FOP5
 	done
 ```
 
-FOP1 - check complete
+FOP1
 
 ```bash
 	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
@@ -198,21 +198,51 @@ FOP1 - check complete
 
 LOOK AT ASSEMBLY STATS!
 
-NEED TO DO-- CHANGE
-Assemblies were polished using Pilon- for all of them
+## Assemblies were polished using Pilon
 
-  for Assembly in $(ls assembly/canu-1.3/*/FOP2_canu/FOP2_canu.contigs.fasta); do
-    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-    IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
-    TrimF1_Read=$(ls $IlluminaDir/F/s_6_1_sequence_trim.fq.gz);
-    TrimR1_Read=$(ls $IlluminaDir/R/s_6_2_sequence_trim.fq.gz);
-    OutDir=assembly/canu/$Organism/$Strain/edited_contigs
-    ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/pilon
-    qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
-  done
+FOP2
+```bash
+	for Assembly in $(ls assembly/canu-1.3/*/FOP2_canu/FOP2_canu.contigs.fasta); do
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		IlluminaDir=$(ls -d qc_dna/paired/$Organism/FOP2)
+		TrimF1_Read=$(ls $IlluminaDir/F/FOP2_S1_L001_R1_001_trim.fq.gz);
+		TrimR1_Read=$(ls $IlluminaDir/R/FOP2_S1_L001_R2_001_trim.fq.gz);
+		OutDir=assembly/canu/$Organism/$Strain/polished
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+		qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
+	done
+```
 
 
+FOP5
+```bash
+	for Assembly in $(ls assembly/canu-1.3/*/FOP5_canu/FOP5_canu.contigs.fasta); do
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		IlluminaDir=$(ls -d qc_dna/paired/$Organism/FOP5)
+		TrimF1_Read=$(ls $IlluminaDir/F/FOP5_S2_L001_R1_001_trim.fq.gz);
+		TrimR1_Read=$(ls $IlluminaDir/R/FOP5_S2_L001_R2_001_trim.fq.gz);
+		OutDir=assembly/canu/$Organism/$Strain/polished
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+		qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
+	done
+```
+
+
+FOP1
+```bash
+	for Assembly in $(ls assembly/canu-1.3/*/FOP1_canu/FOP1_canu.contigs.fasta); do
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		IlluminaDir=$(ls -d qc_dna/paired/$Organism/FOP1)
+		TrimF1_Read=$(ls $IlluminaDir/F/FOP1_S1_L001_R1_001_trim.fq.gz);
+		TrimR1_Read=$(ls $IlluminaDir/R/FOP1_S1_L001_R2_001_trim.fq.gz);
+		OutDir=assembly/canu/$Organism/$Strain/polished
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+		qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
+	done
+```
 
 
 ## Spades Assembly 
@@ -268,6 +298,186 @@ FOP1
 		qsub $ProgDir/sub_spades_pacbio.sh $PacBioDat $TrimF1_Read $TrimR1_Read $OutDir 20
 	done
 ```
+
+
+#Contigs shorter than 500bp were removed from the assembly 
+
+FOP1
+
+```bash
+	for Contigs in $(ls assembly/spades_pacbio/*/FOP1/contigs.fasta); do
+		AssemblyDir=$(dirname $Contigs)
+		mkdir $AssemblyDir/filtered_contigs
+		FilterDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/abyss
+		$FilterDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/filtered_contigs/contigs_min_500bp.fasta
+	done
+```
+
+FOP2
+
+```bash
+	for Contigs in $(ls assembly/spades_pacbio/*/FOP2/contigs.fasta); do
+		AssemblyDir=$(dirname $Contigs)
+		mkdir $AssemblyDir/filtered_contigs
+		FilterDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/abyss
+		$FilterDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/filtered_contigs/contigs_min_500bp.fasta
+	done
+```
+
+FOP5
+
+```bash
+	for Contigs in $(ls assembly/spades_pacbio/*/FOP5/contigs.fasta); do
+		AssemblyDir=$(dirname $Contigs)
+		mkdir $AssemblyDir/filtered_contigs
+		FilterDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/abyss
+		$FilterDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/filtered_contigs/contigs_min_500bp.fasta
+	done
+```
+
+
+# Merging pacbio and hybrid assemblies
+
+FOP1
+
+Merging
+```bash
+	for PacBioAssembly in $(ls assembly/canu/F.oxysporum_fsp_pisi/FOP1_canu/polished/pilon.fasta); do
+		Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
+		Strain=FOP1
+		HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/contigs.fasta)
+		OutDir=assembly/merged_canu_spades/$Organism/$Strain
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/quickmerge
+		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir 
+	done
+```
+----Remove contaminants *didnt need to do this???
+```bash
+	touch tmp.csv
+		for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_pisi/FOP1/merged.fasta); do
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		OutDir=$(dirname $Assembly)
+		mkdir -p $OutDir
+		ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+		$ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_contigs_renamed.fasta --coord_file tmp.csv
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
+	rm tmp.csv
+```
+-------
+
+
+Merged assembly polished using Pilon
+```bash
+	for Assembly in $(ls assembly/merged_canu_spades/*/FOP1/merged.fasta); do
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
+		TrimF1_Read=$(ls $IlluminaDir/F/FOP1_S1_L001_R1_001_trim.fq.gz);
+		TrimR1_Read=$(ls $IlluminaDir/R/FOP1_S1_L001_R2_001_trim.fq.gz);
+		OutDir=assembly/merged_canu_spades/$Organism/$Strain/polished
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+		qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
+	done
+```
+
+FOP2 
+
+Merging
+```bash
+	for PacBioAssembly in $(ls assembly/canu/F.oxysporum_fsp_pisi/FOP2_canu/polished/pilon.fasta); do
+		Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
+		Strain=FOP2
+		HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/contigs.fasta)
+		OutDir=assembly/merged_canu_spades/$Organism/$Strain
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/quickmerge
+		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir 
+	done
+```
+
+----Remove contaminants *didnt need to do this??
+```bash
+	touch tmp.csv
+		for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_pisi/FOP2/merged.fasta); do
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		OutDir=$(dirname $Assembly)
+		mkdir -p $OutDir
+		ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+		$ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_contigs_renamed.fasta --coord_file tmp.csv
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
+	rm tmp.csv
+```
+-------
+
+Merged assembly polished using Pilon
+```bash
+	for Assembly in $(ls assembly/merged_canu_spades/*/FOP2/merged.fasta); do
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
+		TrimF1_Read=$(ls $IlluminaDir/F/FOP2_S1_L001_R1_001_trim.fq.gz);
+		TrimR1_Read=$(ls $IlluminaDir/R/FOP2_S1_L001_R2_001_trim.fq.gz);
+		OutDir=assembly/merged_canu_spades/$Organism/$Strain/polished
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+		qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
+	done
+```
+
+
+
+FOP5 
+
+Merging
+```bash
+	for PacBioAssembly in $(ls assembly/canu/F.oxysporum_fsp_pisi/FOP5_canu/polished/pilon.fasta); do
+		Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
+		Strain=FOP5
+		HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/contigs.fasta)
+		OutDir=assembly/merged_canu_spades/$Organism/$Strain
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/quickmerge
+		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir 
+	done
+```
+
+----Remove contaminants *didnt need to do this???
+```bash
+	touch tmp.csv
+		for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_pisi/FOP5/merged.fasta); do
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		OutDir=$(dirname $Assembly)
+		mkdir -p $OutDir
+		ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+		$ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_contigs_renamed.fasta --coord_file tmp.csv
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
+	rm tmp.csv
+```
+-------
+
+Merged assembly polished using Pilon
+```bash
+	for Assembly in $(ls assembly/merged_canu_spades/*/FOP5/merged.fasta); do
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
+		TrimF1_Read=$(ls $IlluminaDir/F/FOP5_S2_L001_R1_001_trim.fq.gz);
+		TrimR1_Read=$(ls $IlluminaDir/R/FOP5_S2_L001_R2_001_trim.fq.gz);
+		OutDir=assembly/merged_canu_spades/$Organism/$Strain/polished
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+		qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
+	done
+```
+
+
+
+
 
 
 
