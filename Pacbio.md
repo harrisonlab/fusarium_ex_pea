@@ -351,7 +351,10 @@ Merging
 		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir 
 	done
 ```
-----Remove contaminants *didnt need to do this???
+
+
+
+Remove contaminants and renames files 
 ```bash
 	touch tmp.csv
 		for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_pisi/FOP1/merged.fasta); do
@@ -366,12 +369,13 @@ Merging
 	done
 	rm tmp.csv
 ```
--------
+output of ^
+assembly/merged_canu_spades/F.oxysporum_fsp_pisi/FOP1/FOP1_contigs_renamed.fasta
 
 
 Merged assembly polished using Pilon
 ```bash
-	for Assembly in $(ls assembly/merged_canu_spades/*/FOP1/merged.fasta); do
+	for Assembly in $(ls assembly/merged_canu_spades/*/FOP1/FOP1_contigs_renamed.fasta); do
 		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
 		IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
@@ -382,6 +386,28 @@ Merged assembly polished using Pilon
 		qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir
 	done
 ```
+
+
+DO THIS? 
+Remove contaminants and rename
+```bash
+ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+  touch tmp.csv
+  # for Assembly in $(ls assembly/merged_canu_spades/*/*/polished/pilon.fasta); do
+  # for Assembly in $(ls assembly/pacbio_test/F.oxysporum_fsp_cepae/Fus2_pacbio_merged/polished/pilon.fasta); do
+    for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited2/polished/pilon.fasta); do
+  # for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_cepae/Fus2_edited2/polished/pilon.fasta); do
+    Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+    Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+    # OutDir=assembly/merged_canu_spades/$Organism/$Strain/filtered_contigs
+    OutDir=assembly/merged_canu_spades/$Organism/$Strain/filtered_contigs
+    mkdir -p $OutDir
+    $ProgDir/remove_contaminants.py --inp $Assembly --out $OutDir/"$Strain"_contigs_renamed.fasta --coord_file tmp.csv
+  done
+  rm tmp.csv
+```
+
+
 
 FOP2 
 
@@ -397,7 +423,7 @@ Merging
 	done
 ```
 
-----Remove contaminants *didnt need to do this??
+Remove contaminants and rename
 ```bash
 	touch tmp.csv
 		for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_pisi/FOP2/merged.fasta); do
@@ -412,11 +438,11 @@ Merging
 	done
 	rm tmp.csv
 ```
--------
+
 
 Merged assembly polished using Pilon
 ```bash
-	for Assembly in $(ls assembly/merged_canu_spades/*/FOP2/merged.fasta); do
+	for Assembly in $(ls assembly/merged_canu_spades/*/FOP2/FOP2_contigs_renamed.fasta); do
 		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
 		IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
@@ -444,7 +470,7 @@ Merging
 	done
 ```
 
-----Remove contaminants *didnt need to do this???
+Remove contaminants and rename
 ```bash
 	touch tmp.csv
 		for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_pisi/FOP5/merged.fasta); do
@@ -459,11 +485,11 @@ Merging
 	done
 	rm tmp.csv
 ```
--------
+
 
 Merged assembly polished using Pilon
 ```bash
-	for Assembly in $(ls assembly/merged_canu_spades/*/FOP5/merged.fasta); do
+	for Assembly in $(ls assembly/merged_canu_spades/*/FOP5/FOP5_contigs_renamed.fasta); do
 		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
 		IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
@@ -476,9 +502,28 @@ Merged assembly polished using Pilon
 ```
 
 
+# Assembly stats were collected using Quast    REPEAT
+
+```bash
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		for Assembly in $(ls assembly/merged_canu_spades/*/*/polished/pilon.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+		OutDir=assembly/merged_canu_spades/$Organism/$Strain/polished
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
+```
 
 
+## Repeat masking    REPEAT
+Repeat masking of canu assemblies (polished)
 
-
+```bash
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/repeat_masking
+		for Assembly in $(ls assembly/canu/*/*/polished/pilon.fasta); do
+		qsub $ProgDir/rep_modeling.sh $Assembly
+		qsub $ProgDir/transposonPSI.sh $Assembly
+	done
+```
 
 	
