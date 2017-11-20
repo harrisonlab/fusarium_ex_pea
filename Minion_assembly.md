@@ -14,8 +14,6 @@ for Strain in "FOP1-EMR" "F81" "R2"; do
 done
 
 ssh nanopore@nanopore
-mkdir FoP_warwick
-cd FoP_warwick
 screen -a
 # Oxford nanopore 2017-07-11
 Organism="F.oxysporum_fsp_pisi"
@@ -26,21 +24,22 @@ Kit="SQK-LSK108"
 RawDatDir=/data/seq_data/minion/2017/20170711_1532_FOP1-EMR/fast5/pass
 OutDir=/home/groups/harrisonlab/project_files/fusarium_ex_pea/raw_dna/minion/$Organism/$Strain
 
-mkdir -p ~/FoP_warwick/$Date
-cd ~/FoP_warwick/$Date
+WorkDir=/mnt/local_data/nanopore/FoP_warwick/$Date
+mkdir -p $WorkDir
+cd $WorkDir
 ~/.local/bin/read_fast5_basecaller.py \
   --flowcell $FlowCell \
   --kit $Kit \
   --input $RawDatDir \
   --recursive \
-  --worker_threads 24 \
+  --worker_threads 12 \
   --save_path "$Organism"_"$Strain"_"$Date" \
   --output_format fastq,fast5 \
   --reads_per_fastq_batch 4000
   cat "$Organism"_"$Strain"_"$Date"/workspace/pass/*.fastq | gzip -cf > "$Organism"_"$Strain"_"$Date"_albacore_v2.02.fastq.gz
-  scp "$Organism"_"$Strain"_"$Date"_albacore_v2.02.fastq.gz armita@192.168.1.200:$OutDir/.
   tar -cz -f "$Organism"_"$Strain"_"$Date".tar.gz "$Organism"_"$Strain"_"$Date"
-  mkdir -p $OutDir
+  # mkdir -p $OutDir
+  scp "$Organism"_"$Strain"_"$Date"_albacore_v2.02.fastq.gz armita@192.168.1.200:$OutDir/.
   scp "$Organism"_"$Strain"_"$Date".tar.gz armita@192.168.1.200:$OutDir/.
 
   #
@@ -59,21 +58,22 @@ cd ~/FoP_warwick/$Date
   RawDatDir=/data/scratch/nanopore_tmp_data/Fop/F81/albacore_output_1.2.4/workspace
   OutDir=/home/groups/harrisonlab/project_files/fusarium_ex_pea/raw_dna/minion/$Organism/$Strain
 
-  mkdir -p ~/FoP_warwick/$Date
-  cd ~/FoP_warwick/$Date
+  WorkDir=/mnt/local_data/nanopore/FoP_warwick/$Date
+  mkdir -p $WorkDir
+  cd $WorkDir
   ~/.local/bin/read_fast5_basecaller.py \
     --flowcell $FlowCell \
     --kit $Kit \
     --input $RawDatDir \
     --recursive \
-    --worker_threads 24 \
+    --worker_threads 12 \
     --save_path "$Organism"_"$Strain"_"$Date" \
     --output_format fastq,fast5 \
     --reads_per_fastq_batch 4000
     cat "$Organism"_"$Strain"_"$Date"/workspace/pass/*.fastq | gzip -cf > "$Organism"_"$Strain"_"$Date"_albacore_v2.02.fastq.gz
-    scp "$Organism"_"$Strain"_"$Date"_albacore_v2.02.fastq.gz armita@192.168.1.200:$OutDir/.
     tar -cz -f "$Organism"_"$Strain"_"$Date".tar.gz "$Organism"_"$Strain"_"$Date"
-    mkdir -p $OutDir
+    # mkdir -p $OutDir
+    scp "$Organism"_"$Strain"_"$Date"_albacore_v2.02.fastq.gz armita@192.168.1.200:$OutDir/.
     scp "$Organism"_"$Strain"_"$Date".tar.gz armita@192.168.1.200:$OutDir/.
 
     # Oxford nanopore FoP R2
@@ -82,23 +82,24 @@ cd ~/FoP_warwick/$Date
     Date="2017-05-17"
     FlowCell="FLO-MIN107"
     Kit="SQK-LSK108"
-    RawDatDir=/data/scratch/nanopore_tmp_data/Fop/R2/albacore_output_1.2.4/workspace
+    RawDatDir=/data/scratch/nanopore_tmp_data/Fop/R2
     OutDir=/home/groups/harrisonlab/project_files/fusarium_ex_pea/raw_dna/minion/$Organism/$Strain
 
-    mkdir -p ~/FoP_warwick/$Date
-    cd ~/FoP_warwick/$Date
+    WorkDir=/mnt/local_data/nanopore/FoP_warwick/$Date
+    mkdir -p $WorkDir
+    cd $WorkDir
     ~/.local/bin/read_fast5_basecaller.py \
       --flowcell $FlowCell \
       --kit $Kit \
       --input $RawDatDir \
       --recursive \
-      --worker_threads 24 \
+      --worker_threads 12 \
       --save_path "$Organism"_"$Strain"_"$Date" \
       --output_format fastq,fast5 \
       --reads_per_fastq_batch 4000
       cat "$Organism"_"$Strain"_"$Date"/workspace/pass/*.fastq | gzip -cf > "$Organism"_"$Strain"_"$Date"_albacore_v2.02.fastq.gz
-      scp "$Organism"_"$Strain"_"$Date"_albacore_v2.02.fastq.gz armita@192.168.1.200:$OutDir/.
       tar -cz -f "$Organism"_"$Strain"_"$Date".tar.gz "$Organism"_"$Strain"_"$Date"
-      mkdir -p $OutDir
+      # mkdir -p $OutDir
+      scp "$Organism"_"$Strain"_"$Date"_albacore_v2.02.fastq.gz armita@192.168.1.200:$OutDir/.
       scp "$Organism"_"$Strain"_"$Date".tar.gz armita@192.168.1.200:$OutDir/.
 ```
