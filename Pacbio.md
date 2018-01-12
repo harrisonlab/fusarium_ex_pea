@@ -299,6 +299,19 @@ FOP1
 	done
 ```
 
+```bash
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/spades_pacbio/*/FOP1/contigs.fasta); do
+Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+OutDir=assembly/spades_pacbio/$Organism/$Strain/quast
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
+
+
+
+
 
 #Contigs shorter than 500bp were removed from the assembly 
 
@@ -340,18 +353,60 @@ FOP5
 
 FOP1
 
-Merging
+Can run the quickmerge prog with $PacBioAssembly first or $HybridAssembly first. Try both and then do quast for both and see which has the lowest number of contigs and check the genome size 
+
+Merging 1
 ```bash
 	for PacBioAssembly in $(ls assembly/canu/F.oxysporum_fsp_pisi/FOP1_canu/polished/pilon.fasta); do
 		Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
 		Strain=FOP1
 		HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/contigs.fasta)
 		OutDir=assembly/merged_canu_spades/$Organism/$Strain
+		AnchorLength=100000
 		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/quickmerge
-		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir 
+		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir $AnchorLength
+	done
+```
+Merging 2
+```bash
+	for PacBioAssembly in $(ls assembly/canu/F.oxysporum_fsp_pisi/FOP1_canu/polished/pilon.fasta); do
+		Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
+		Strain=FOP1
+		HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/contigs.fasta)
+		OutDir=assembly/merged_canu_spades/$Organism/"$Strain"_reversed_order
+		AnchorLength=100000
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/quickmerge
+		qsub $ProgDir/sub_quickmerge.sh $HybridAssembly $PacBioAssembly $OutDir $AnchorLength
 	done
 ```
 
+
+
+quast for each variation of merging
+
+Merge1
+```bash
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_pisi/FOP1/merged.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+		OutDir=assembly/merged_canu_spades/$Organism/$Strain/quast_merged1
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
+```
+
+Merge2
+```bash
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_pisi/FOP1_reversed_order/merged.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+		OutDir=assembly/merged_canu_spades/$Organism/FOP1_reversed_order/quast_merged2
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
+```
+
+COMPARE THESE quasts and choose for below scripts... if its the first one you've already done it. 
 
 
 Remove contaminants and renames files 
@@ -526,4 +581,26 @@ Repeat masking of canu assemblies (polished)
 	done
 ```
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	merging assemblies
+	
+	```bash
+	for PacBioAssembly in $(ls assembly/canu/F.oxysporum_fsp_pisi/FOP1_canu/polished/pilon.fasta); do
+		Organism=$(echo $PacBioAssembly | rev | cut -f4 -d '/' | rev)
+		Strain=FOP1
+		HybridAssembly=$(ls assembly/spades_pacbio/$Organism/"$Strain"_etc/contigs.fasta)
+		OutDir=assembly/merged_canu_spades/$Organism/$Strain
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/quickmerge
+		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir     *change order of PacBioAssemly and HybridAssembly
+	done
+```
+	
 	
