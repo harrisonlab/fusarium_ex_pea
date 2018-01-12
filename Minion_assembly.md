@@ -1,5 +1,6 @@
 # Fusarium oxysporum f.sp. pisi (Minion and Miseq assemblies)
 ## Commands used for the analysis of F.oxysporum f.sp pisi sequences FOP1 EMR, F81 and R2
+<<<<<<< HEAD
 Based on Fusarium venenatum git repos
 
 # Copying data Minion and MiSeq
@@ -8,6 +9,9 @@ Based on Fusarium venenatum git repos
 
 Data was basecalled using Albacore 2.02 on the minion server:
 
+
+
+Data was basecalled again using Albacore 2.02 on the minion server:
 
 ```bash
 Organism="F.oxysporum_fsp_pisi"
@@ -531,3 +535,5 @@ Reads1=$(ls qc_dna/minion/F.venenatum/WT/F.venenatum_WT_07-03-17_albacore_v2.02_
 
 
 
+=======
+>>>>>>> f16da97d3f79197e6da19f75e184633b45878c39

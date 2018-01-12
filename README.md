@@ -485,11 +485,11 @@ Fus2_PDB
 Then Rnaseq data was aligned to each genome assembly:
 
 ```bash
-for Assembly in $(ls repeat_masked/*/*/*/*_contigs_unmasked.fa); do
+for Assembly in $(ls repeat_masked/*/FOP5/*/*_contigs_unmasked.fa); do
         Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
         Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
         echo "$Organism - $Strain"
-        for RNADir in $(ls -d ../fusarium/qc_rna/paired/F.oxysporum_fsp_cepae/* | grep -v -e '_rep'); do
+        for RNADir in $(ls -d ../fusarium/qc_rna/paired/F.oxysporum_fsp_cepae/*); do
             Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
             echo "$Timepoint"
             FileF=$(ls $RNADir/F/*_trim.fq.gz)
@@ -519,9 +519,20 @@ Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
                 Jobs=$(qstat | grep 'tophat' | grep 'qw' | wc -l)
             done
 
+Re-ran again as was getting an error message in the next section
+
+F.oxysporum_fsp_pisi - FOP5
+open: No such file or directory
+[bam_merge_core] fail to open file alignment/F.oxysporum_fsp_pisi/FOP5/55_72hrs_rep3/accepted_hits.bam
+Your job 6666661 ("sub_braker_fungi.sh") has been submitted
+
+So ran again for FOP5, PG18 and PG3 separately 16.11.16
 
 
 
+
+
+#Dont do again
 Up until now we have been using just the repeatmasker/repeatmodeller fasta file when we have used softmasked fasta files. You can merge in transposonPSI masked sites using the following command:
 
 ```bash  
@@ -551,7 +562,7 @@ Number of masked bases:
 repeat_masked/F.oxysporum_fsp_pisi/PG3/filtered_contigs_repmask/PG3_contigs_softmasked_repeatmasker_TPSI_appended.fa
 Number of masked bases:
 5170668
-
+##Continue
 
 
 
@@ -566,8 +577,6 @@ Before braker predictiction was performed, I double checked that I had the genem
 ```
 
 
-DONE up to here.
-
 
 ```bash
 for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
@@ -577,18 +586,28 @@ for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_
     echo "$Organism - $Strain"
     mkdir -p alignment/$Organism/$Strain/concatenated
     samtools merge -f alignment/$Organism/$Strain/concatenated/concatenated.bam \
-    alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
-    alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
-    alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
-    alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
-    alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
-    alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
-    alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
-    alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
-    alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
-    alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
-    alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
-    alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
+    alignment/$Organism/$Strain/55_72hrs_rep1/accepted_hits.bam \
+	alignment/$Organism/$Strain/55_72hrs_rep2/accepted_hits.bam \
+	alignment/$Organism/$Strain/55_72hrs_rep3/accepted_hits.bam \
+	alignment/$Organism/$Strain/FO47_72hrs_rep1/accepted_hits.bam \
+	alignment/$Organism/$Strain/FO47_72hrs_rep2/accepted_hits.bam \
+	alignment/$Organism/$Strain/FO47_72hrs_rep3/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_0hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_16hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_24hrs_prelim_rep1/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_36hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_48hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_4hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_72hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_72hrs_rep1/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_72hrs_rep2/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_72hrs_rep3/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_8hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_96hrs_prelim/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_CzapekDox/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_GlucosePeptone/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_PDA/accepted_hits.bam \
+	alignment/$Organism/$Strain/Fus2_PDB/accepted_hits.bam
     OutDir=gene_pred/braker/$Organism/"$Strain"_braker
     AcceptedHits=alignment/$Organism/$Strain/concatenated/concatenated.bam
     GeneModelName="$Organism"_"$Strain"_braker
@@ -598,7 +617,27 @@ for Assembly in $(ls repeat_masked/*/*/*/*_contigs_softmasked_repeatmasker_TPSI_
 ```
       
 
+F.oxysporum_fsp_pisi - FOP1
+Your job 6666565 ("sub_braker_fungi.sh") has been submitted
 
+F.oxysporum_fsp_pisi - FOP2
+Your job 6666660 ("sub_braker_fungi.sh") has been submitted
+
+F.oxysporum_fsp_pisi - FOP5
+open: No such file or directory
+[bam_merge_core] fail to open file alignment/F.oxysporum_fsp_pisi/FOP5/55_72hrs_rep3/accepted_hits.bam
+Your job 6666661 ("sub_braker_fungi.sh") has been submitted
+
+F.oxysporum_fsp_pisi - PG18
+open: No such file or directory
+[bam_merge_core] fail to open file alignment/F.oxysporum_fsp_pisi/PG18/FO47_72hrs_rep1/accepted_hits.bam
+Your job 6666662 ("sub_braker_fungi.sh") has been submitted
+
+F.oxysporum_fsp_pisi - PG3
+open: No such file or directory
+[bam_merge_core] fail to open file alignment/F.oxysporum_fsp_pisi/PG3/55_72hrs_rep3/accepted_hits.bam
+Your job 6666663 ("sub_braker_fungi.sh") has been submitted
+jenkis@bio72:/home/groups/harrisonlab/project_files/fusarium_ex_pea$ 
 
 
 

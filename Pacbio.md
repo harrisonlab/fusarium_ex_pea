@@ -34,7 +34,7 @@ S3R1 (FOP5) = Fusarium oxysporum f.sp. pisi
 	mkdir -p $ProjectDir/raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1
 	mkdir -p $ProjectDir/raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP2
 	mkdir -p $ProjectDir/raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP5
-```	
+```
 
 ## Sequence data was moved into appropriate directories
 
@@ -44,26 +44,26 @@ S3R1 (FOP5) = Fusarium oxysporum f.sp. pisi
 	cp $RawDatDir/John_Clarkson_UWAR.JC.ENQ-1929_S1.tar.gz $ProjectDir/raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1
 	cp $RawDatDir/John_Clarkson_UWAR.JC.ENQ-1929_S1_raw_reads.tar.gz $ProjectDir/raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1
 	cp $RawDatDir/John_Clarkson_UWAR.JC.ENQ-1929_R_S2.tar.gz $ProjectDir/raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP2
-	cp $RawDatDir/John_Clarkson_UWAR.JC.ENQ-1929_R_S3R1.tar.gz $ProjectDir/raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP5	
+	cp $RawDatDir/John_Clarkson_UWAR.JC.ENQ-1929_R_S3R1.tar.gz $ProjectDir/raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP5
 ```
 
-## Data was extracted for each isolate and concatenated 
+## Data was extracted for each isolate and concatenated
 
-FOP2 extracted 
+FOP2 extracted
 
 ```bash
 	cd raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP2
 	tar -zxvf John_Clarkson_UWAR.JC.ENQ-1929_R_S2.tar.gz
 ```
 
-FOP5 extracted 
+FOP5 extracted
 
 ```bash
 	cd raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP5
 	tar -zxvf John_Clarkson_UWAR.JC.ENQ-1929_R_S3R1.tar.gz
 ```
 
-FOP1 (both files) extracted 
+FOP1 (both files) extracted
 
 ```bash
 	cd raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1
@@ -71,7 +71,7 @@ FOP1 (both files) extracted
 	tar -zxvf John_Clarkson_UWAR.JC.ENQ-1929_S1.tar.gz
 ```
 
-FOP2 concatenated 
+FOP2 concatenated
 
 ```bash
 	OutDir=raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP2/extracted
@@ -83,7 +83,7 @@ FOP2 concatenated
 	cat raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP2/*/raw_reads/*/Analysis_Results/*.subreads.fastq > $OutDir/concatenated_pacbio.fastq
 ```
 
-FOP5 concatenated 
+FOP5 concatenated
 
 ```bash
 	OutDir=raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP5/extracted
@@ -95,7 +95,7 @@ FOP5 concatenated
 	cat raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP5/*/raw_reads/*/Analysis_Results/*.subreads.fastq > $OutDir/concatenated_pacbio.fastq
 ```
 
-FOP1 concatenated 
+FOP1 concatenated
 
 ```bash
 	OutDir=raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1/extracted
@@ -115,11 +115,11 @@ To:  raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1/*/*/Analysis_Results/*.subreads.fa
 
 
 
-## Canu Assembly 
+## Canu Assembly
 
 FOP2 assembly
 
-```bash 
+```bash
 	Reads=$(ls raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP2/extracted/concatenated_pacbio.fastq)
   	GenomeSz="50m"
   	Strain=$(echo $Reads | rev | cut -f3 -d '/' | rev)
@@ -127,6 +127,19 @@ FOP2 assembly
   	Prefix="$Strain"_canu
   	OutDir="assembly/canu-1.3/$Organism/$Strain"_canu
   	ProgDir=~/git_repos/tools/seq_tools/assemblers/canu
+  	qsub $ProgDir/submit_canu.sh $Reads $GenomeSz $Prefix $OutDir
+```
+
+FOP2 assembly
+
+```bash
+		Reads=$(ls raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP2/extracted/concatenated_pacbio.fastq)
+  	GenomeSz="55m"
+  	Strain=$(echo $Reads | rev | cut -f3 -d '/' | rev)
+  	Organism=$(echo $Reads | rev | cut -f4 -d '/' | rev)
+  	Prefix="$Strain"_canu
+  	OutDir="assembly/canu-1.6/$Organism/$Strain"_canu
+  	ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/canu
   	qsub $ProgDir/submit_canu.sh $Reads $GenomeSz $Prefix $OutDir
 ```
 
@@ -141,8 +154,8 @@ FOP5 assembly
   	OutDir="assembly/canu-1.3/$Organism/$Strain"_canu
   	ProgDir=~/git_repos/tools/seq_tools/assemblers/canu
   	qsub $ProgDir/submit_canu.sh $Reads $GenomeSz $Prefix $OutDir
-``` 
-  
+```
+
 FOP1 assembly  
 
 ```bash
@@ -158,7 +171,7 @@ FOP1 assembly
 
 
 
-## Assembly stats were collected using quast 
+## Assembly stats were collected using quast
 
 FOP2
 
@@ -245,7 +258,7 @@ FOP1
 ```
 
 
-## Spades Assembly 
+## Spades Assembly
 
 FOP2  
 
@@ -262,11 +275,11 @@ FOP2
 		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/spades
 		qsub $ProgDir/sub_spades_pacbio.sh $PacBioDat $TrimF1_Read $TrimR1_Read $OutDir 20
 	done
-``` 
+```
 
 FOP5
 
-```bash 
+```bash
 	for PacBioDat in $(ls raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP5/extracted/concatenated_pacbio.fastq); do
 		Organism=$(echo $PacBioDat | rev | cut -f4 -d '/' | rev)
 		Strain=$(echo $PacBioDat | rev | cut -f3 -d '/' | rev)
@@ -284,7 +297,7 @@ FOP5
 
 FOP1
 
-```bash 
+```bash
 	for PacBioDat in $(ls raw_dna/pacbio/F.oxysporum_fsp_pisi/FOP1/extracted/concatenated_pacbio.fastq); do
 		Organism=$(echo $PacBioDat | rev | cut -f4 -d '/' | rev)
 		Strain=$(echo $PacBioDat | rev | cut -f3 -d '/' | rev)
@@ -313,7 +326,7 @@ done
 
 
 
-#Contigs shorter than 500bp were removed from the assembly 
+#Contigs shorter than 500bp were removed from the assembly
 
 FOP1
 
@@ -364,6 +377,7 @@ Merging 1
 		OutDir=assembly/merged_canu_spades/$Organism/$Strain
 		AnchorLength=100000
 		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/quickmerge
+<<<<<<< HEAD
 		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir $AnchorLength
 	done
 ```
@@ -403,13 +417,16 @@ Merge2
 		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
 		OutDir=assembly/merged_canu_spades/$Organism/FOP1_reversed_order/quast_merged2
 		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+=======
+		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir
+
 	done
 ```
 
 COMPARE THESE quasts and choose for below scripts... if its the first one you've already done it. 
 
 
-Remove contaminants and renames files 
+Remove contaminants and renames files
 ```bash
 	touch tmp.csv
 		for Assembly in $(ls assembly/merged_canu_spades/F.oxysporum_fsp_pisi/FOP1/merged.fasta); do
@@ -443,7 +460,7 @@ Merged assembly polished using Pilon
 ```
 
 
-DO THIS? 
+DO THIS?
 Remove contaminants and rename
 ```bash
 ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
@@ -464,7 +481,7 @@ ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
 
 
 
-FOP2 
+FOP2
 
 Merging
 ```bash
@@ -474,7 +491,7 @@ Merging
 		HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/contigs.fasta)
 		OutDir=assembly/merged_canu_spades/$Organism/$Strain
 		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/quickmerge
-		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir 
+		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir
 	done
 ```
 
@@ -511,7 +528,7 @@ Merged assembly polished using Pilon
 
 
 
-FOP5 
+FOP5
 
 Merging
 ```bash
@@ -521,7 +538,7 @@ Merging
 		HybridAssembly=$(ls assembly/spades_pacbio/$Organism/$Strain/contigs.fasta)
 		OutDir=assembly/merged_canu_spades/$Organism/$Strain
 		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/quickmerge
-		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir 
+		qsub $ProgDir/sub_quickmerge.sh $PacBioAssembly $HybridAssembly $OutDir
 	done
 ```
 
@@ -580,6 +597,7 @@ Repeat masking of canu assemblies (polished)
 		qsub $ProgDir/transposonPSI.sh $Assembly
 	done
 ```
+
 
 	
 	
