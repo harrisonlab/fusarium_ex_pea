@@ -1,6 +1,6 @@
 # Fusarium oxysporum f.sp. pisi (Minion and Miseq assemblies)
 ## Commands used for the analysis of F.oxysporum f.sp pisi sequences FOP1 EMR, F81 and R2
-<<<<<<< HEAD
+
 Based on Fusarium venenatum git repos
 
 # Copying data Minion and MiSeq
@@ -293,8 +293,8 @@ F81
 ```bash
 Organism=F.oxysporum_fsp_pisi
 Strain=F81
-Reads1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n1 | tail -n1)
-Reads2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
+Reads1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz #| head -n1 | tail -n1)
+#Reads2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
 GenomeSz="52m"
 Prefix="$Strain"
 OutDir=assembly/canu-1.6/$Organism/$Strain
@@ -303,9 +303,7 @@ qsub $ProgDir/submit_canu_minion_2lib.sh $Reads1 $Reads2 $GenomeSz $Prefix $OutD
 ```
 
 8448769 job number
-
-
-
+(didnt need the # bits)
 
 
 FOP1 EMR
@@ -313,8 +311,8 @@ FOP1 EMR
 ```bash
 Organism=F.oxysporum_fsp_pisi
 Strain=FOP1-EMR
-Reads1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n1 | tail -n1)
-Reads2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
+Reads1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz #| head -n1 | tail -n1)
+#Reads2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
 GenomeSz="52m"
 Prefix="$Strain"
 OutDir=assembly/canu-1.6/$Organism/$Strain
@@ -322,15 +320,15 @@ ProgDir=~/git_repos/tools/seq_tools/assemblers/canu
 qsub $ProgDir/submit_canu_minion_2lib.sh $Reads1 $Reads2 $GenomeSz $Prefix $OutDir
 ```
 job 8449090
-
+(didnt need the # bits)
 
 R2
 
 ```bash
 Organism=F.oxysporum_fsp_pisi
 Strain=R2
-Reads1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n1 | tail -n1)
-Reads2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
+Reads1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz #| head -n1 | tail -n1)
+#Reads2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
 GenomeSz="52m"
 Prefix="$Strain"
 OutDir=assembly/canu-1.6/$Organism/$Strain
@@ -338,7 +336,7 @@ ProgDir=~/git_repos/tools/seq_tools/assemblers/canu
 qsub $ProgDir/submit_canu_minion_2lib.sh $Reads1 $Reads2 $GenomeSz $Prefix $OutDir
 ```
 job 8449091
-
+(didnt need the # bits)
 
 
 ## Assembly using SMARTdenovo
@@ -346,40 +344,40 @@ job 8449091
 F81
 
 ```bash
-for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/F81/F81.trimmedReads.fasta.gz); do
-Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
-Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
-Prefix="$Strain"
-OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
-qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
-done
+	for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/F81/F81.trimmedReads.fasta.gz); do
+		Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
+		Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
+		Prefix="$Strain"
+		OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
+		qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
+	done
 ```
 
 FOP1 EMR
 
 ```bash
-for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/FOP1-EMR/FOP1-EMR.trimmedReads.fasta.gz); do
-Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
-Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
-Prefix="$Strain"
-OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
-qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
-done
+	for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/FOP1-EMR/FOP1-EMR.trimmedReads.fasta.gz); do
+		Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
+		Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
+		Prefix="$Strain"
+		OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
+		qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
+	done
 ```
 
 R2
 
 ```bash
-for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/R2/R2.trimmedReads.fasta.gz); do
-Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
-Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
-Prefix="$Strain"
-OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
-qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
-done
+	for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/R2/R2.trimmedReads.fasta.gz); do
+		Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
+		Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
+		Prefix="$Strain"
+		OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
+		qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
+	done
 ```
 
 
@@ -388,69 +386,74 @@ done
 
 
 ```bash
-for Contigs in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg); do
-AssemblyDir=$(dirname $Contigs)
-mkdir $AssemblyDir/filtered_contigs
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/abyss
-$ProgDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/contigs_min_500bp.fasta
-done
+	for Contigs in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg); do
+		AssemblyDir=$(dirname $Contigs)
+		mkdir $AssemblyDir/filtered_contigs
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/abyss
+		$ProgDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/contigs_min_500bp.fasta
+	done
 ```
 
 ## Quast (canu)
 
 ```bash
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
-for Assembly in $(ls assembly/canu-1.6/*/*/*.contigs.fasta); do
-Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
-OutDir=assembly/canu-1.6/$Organism/$Strain/filtered_contigs
-qsub $ProgDir/sub_quast.sh $Assembly $OutDir
-done
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		for Assembly in $(ls assembly/canu-1.6/*/*/*.contigs.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+		OutDir=assembly/canu-1.6/$Organism/$Strain/filtered_contigs
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
 ```
 
 ### Quast (SMARTdenovo)
 
 ```bash
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
-for Assembly in $(ls assembly/SMARTdenovo/*/*/contigs_min_500bp.fasta); do
-Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
-OutDir=$(dirname $Assembly)
-qsub $ProgDir/sub_quast.sh $Assembly $OutDir
-done
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		for Assembly in $(ls assembly/SMARTdenovo/*/*/contigs_min_500bp.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+		OutDir=$(dirname $Assembly)
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
 ```
 
 
-## Error correction using Racon (canu)    check used right qsub line?
+## Error correction using Racon (canu)
+
+Didnt actually need to do this as we will only use SMARTdenovo from now on. Only needs ReadsFq1 line and no others, although I actually used all the lines when I ran it and the first qsub line
 
 ```bash
-for Assembly in $(ls assembly/canu-1.6/*/*/*.contigs.fasta); do
-Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-echo "$Organism - $Strain"
-ReadsFq1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n1 | tail -n1)
-ReadsFq2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
-ReadsAppended=qc_dna/minion/$Organism/$Strain/"$Strain"_reads_appended.fastq.gz
-cat $ReadsFq1 $ReadsFq2 > $ReadsAppended
-OutDir=assembly/canu-1.6/$Organism/$Strain/racon
-Iterations=10
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/racon
-qsub $ProgDir/sub_racon.sh $Assembly $ReadsAppended $Iterations $OutDir
-done
-# rm $ReadsAppended
+	for Assembly in $(ls assembly/canu-1.6/*/*/*.contigs.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		echo "$Organism - $Strain"
+		ReadsFq1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n1 | tail -n1)
+		#ReadsFq2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
+		#ReadsAppended=qc_dna/minion/$Organism/$Strain/"$Strain"_reads_appended.fastq.gz
+		cat $ReadsFq1 $ReadsFq2 > $ReadsAppended
+		OutDir=assembly/canu-1.6/$Organism/$Strain/racon
+		Iterations=10
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/racon
+		#qsub $ProgDir/sub_racon.sh $Assembly $ReadsAppended $Iterations $OutDir
+		qsub $ProgDir/sub_racon.sh $Assembly $ReadFq1 $Iterations $OutDir
+	done
+	rm $ReadsAppended
 ```
 
 
-## Error correction using Racon (SMARTdenovo)   run this? check the qsub line to see which one? RAN 
+## Error correction using Racon (SMARTdenovo)   
+
+Didn't need to run the lines with the # even though I did do. 
 
 ```bash
 	for Assembly in $(ls assembly/SMARTdenovo/*/*/contigs_min_500bp.fasta); do
 		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
 		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 		ReadsFq1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n1 | tail -n1)
-		ReadsFq2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
-		ReadsAppended=qc_dna/minion/$Organism/$Strain/"$Strain"_reads_appended.fastq.gz
-		cat $ReadsFq1 $ReadsFq2 > $ReadsAppended
+		#ReadsFq2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
+		#ReadsAppended=qc_dna/minion/$Organism/$Strain/"$Strain"_reads_appended.fastq.gz
+		#cat $ReadsFq1 $ReadsFq2 > $ReadsAppended
 		OutDir=$(dirname $Assembly)/racon
 		Iterations=10
 		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/racon
@@ -460,7 +463,7 @@ done
 ```
 
 ```bash   
-	ProgDir=/home/jenkis/git_repos//tools/seq_tools/assemblers/assembly_qc/quast
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
 		for Assembly in $(ls assembly/SMARTdenovo/*/*/racon/contigs_min_500bp_racon_round_10.fasta); do
 		OutDir=$(dirname $Assembly)
 		echo "" > tmp.txt
@@ -473,31 +476,170 @@ done
 ## Quast and busco were run to assess the effects of racon on assembly quality:
 
 ```bash
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
-for Assembly in $(ls assembly/SMARTdenovo/*/*/racon/contigs_min_500bp_racon_round_10.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
-OutDir=$(dirname $Assembly)
-qsub $ProgDir/sub_quast.sh $Assembly $OutDir
-done
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+		for Assembly in $(ls assembly/SMARTdenovo/*/*/racon/contigs_min_500bp_racon_round_10.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+		OutDir=$(dirname $Assembly)
+		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	done
 ```
 
 ```bash
-for Assembly in $(ls assembly/SMARTdenovo/*/*/racon/contigs_min_500bp_racon_round_10.fasta); do
+	for Assembly in $(ls assembly/SMARTdenovo/*/*/racon/contigs_min_500bp_racon_round_10.fasta); do
+		Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+		Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+		echo "$Organism - $Strain"
+		ProgDir=/home/jenkis/git_repos/tools/gene_prediction/busco
+		BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+		OutDir=gene_pred/busco/$Organism/$Strain/assembly
+		qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+	done
+```
+
+8463289 0.25000 sub_busco3 jenkis       qw    01/14/2018 13:32:36                                    4        
+8463290 0.25000 sub_busco3 jenkis       qw    01/14/2018 13:32:36                                    4        
+8463291 0.25000 sub_busco3 jenkis       qw    01/14/2018 13:32:36   
+
+
+8463316 0.50000 sub_busco3 jenkis       r     01/15/2018 10:44:36 main.q@blacklace08.blacklace       4        
+8463317 0.50000 sub_busco3 jenkis       r     01/15/2018 10:44:36 main.q@blacklace05.blacklace       4        
+8463318 0.50000 sub_busco3 jenkis       r     01/15/2018 10:44:36 main.q@blacklace09.blacklace       4      
+
+
+Look at the files 
+
+
+
+
+# Assembly correction using nanopolish 
+
+Fast5 files are very large and need to be stored as gzipped tarballs. These needed temporarily unpacking but must be deleted after nanpolish has finished running.
+
+Raw reads were moved onto the cluster scratch space for this step and unpacked:
+
+```bash
+ScratchDir=/data/scratch/nanopore_tmp_data/Fven
+mkdir -p $ScratchDir
+cp raw_dna/minion/F.oxysporum_fsp_pisi/*/*.tar.gz $ScratchDir/.
+for Tar in $(ls $ScratchDir/*.tar.gz); do
+tar -zxvf $Tar -C $ScratchDir
+done
+```
+
+ScratchDir=/data/scratch/nanopore_tmp_data/Fven
+for Tar in $(ls $ScratchDir/F.oxysporum_fsp_pisi_R2_2017-05-17.tar.gz); do
+tar -zxvf $Tar -C $ScratchDir
+done
+
+
+
+FOP1 EMR
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/FOP1-EMR/racon/racon_min_500bp_renamed.fasta); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
-ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/busco
-BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
-OutDir=gene_pred/busco/$Organism/$Strain/assembly
-qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+ReadsFq1=$(ls raw_dna/minion/*/FOP1-EMR/*.fastq.gz)
+ScratchDir=/data/scratch/nanopore_tmp_data/Fven
+Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_FOP1-EMR_2017-07-11/workspace/pass
+nanopolish index -d $Fast5Dir1 $ReadsFq1
+OutDir=$(dirname $Assembly)
+mkdir -p $OutDir
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $ReadsFq1 $OutDir/nanopolish
 done
 ```
 
 
+# Step 1 extract reads as a .fq file which contain info on the location of the fast5 files
+# Note - the full path from home must be used
+# submit alignments for nanoppolish
 
 
 
+F81
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/F81/racon/racon_min_500bp_renamed.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+ReadsFq1=$(ls raw_dna/minion/*/F81/*.fastq.gz)
+ScratchDir=/data/scratch/nanopore_tmp_data/Fven
+Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_F81_2017-05-17/workspace/pass
+nanopolish index -d $Fast5Dir1 $ReadsFq1
+OutDir=$(dirname $Assembly)
+mkdir -p $OutDir
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $ReadsFq1 $OutDir/nanopolish
+done
+```
+
+
+R2
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/R2/racon/racon_min_500bp_renamed.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+ReadsFq1=$(ls raw_dna/minion/*/R2/*.fastq.gz)
+ScratchDir=/data/scratch/nanopore_tmp_data/Fven
+Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_R2_2017-05-17/workspace/pass
+nanopolish index -d $Fast5Dir1 $ReadsFq1
+OutDir=$(dirname $Assembly)
+mkdir -p $OutDir
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $ReadsFq1 $OutDir/nanopolish
+done
+```
+
+
+Split the assembly into 50Kb fragments an submit each to the cluster for nanopolish correction
+
+
+for Assembly in $(ls assembly/SMARTdenovo/*/*/racon/racon_min_500bp_renamed.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=$(dirname $Assembly)
+RawReads=$(ls raw_dna/minion/*/*/*.fastq.gz)
+AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
+
+NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish/nanopolish_range.txt
+
+Ploidy=1
+echo "nanopolish log:" > nanopolish_log.txt
+for Region in $(cat $OutDir/nanopolish/nanopolish_range.txt | tail -n+2); do
+Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+while [ $Jobs -gt 1 ]; do
+sleep 1m
+printf "."
+Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+done		
+printf "\n"
+echo $Region
+echo $Region >> nanopolish_log.txt
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+done
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+This script is on andrews page (Fv_minion_assembly.md) if you look at the raw file on github. Dont run less SMARTdenovo isnt as good
 
 many steps above this need doing
 
@@ -532,8 +674,3 @@ Reads1=$(ls qc_dna/minion/F.venenatum/WT/F.venenatum_WT_07-03-17_albacore_v2.02_
   rm -r tmp_assembly
 
 
-
-
-
-=======
->>>>>>> f16da97d3f79197e6da19f75e184633b45878c39
