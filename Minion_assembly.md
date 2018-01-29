@@ -532,6 +532,7 @@ for Tar in $(ls $ScratchDir/F.oxysporum_fsp_pisi_R2_2017-05-17.tar.gz); do
 tar -zxvf $Tar -C $ScratchDir
 done
 
+Needed to update generic profile and seq tools to get these to work.
 
 
 FOP1 EMR
@@ -543,7 +544,7 @@ echo "$Organism - $Strain"
 ReadsFq1=$(ls raw_dna/minion/*/FOP1-EMR/*.fastq.gz)
 ScratchDir=/data/scratch/nanopore_tmp_data/Fven
 Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_FOP1-EMR_2017-07-11/workspace/pass
-nanopolish index -d $Fast5Dir1 $ReadsFq1
+#nanopolish index -d $Fast5Dir1 $ReadsFq1
 OutDir=$(dirname $Assembly)
 mkdir -p $OutDir
 ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
@@ -567,7 +568,7 @@ echo "$Organism - $Strain"
 ReadsFq1=$(ls raw_dna/minion/*/F81/*.fastq.gz)
 ScratchDir=/data/scratch/nanopore_tmp_data/Fven
 Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_F81_2017-05-17/workspace/pass
-nanopolish index -d $Fast5Dir1 $ReadsFq1
+#nanopolish index -d $Fast5Dir1 $ReadsFq1
 OutDir=$(dirname $Assembly)
 mkdir -p $OutDir
 ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
@@ -585,7 +586,7 @@ echo "$Organism - $Strain"
 ReadsFq1=$(ls raw_dna/minion/*/R2/*.fastq.gz)
 ScratchDir=/data/scratch/nanopore_tmp_data/Fven
 Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_R2_2017-05-17/workspace/pass
-nanopolish index -d $Fast5Dir1 $ReadsFq1
+#nanopolish index -d $Fast5Dir1 $ReadsFq1
 OutDir=$(dirname $Assembly)
 mkdir -p $OutDir
 ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
@@ -594,15 +595,83 @@ done
 ```
 
 
-Split the assembly into 50Kb fragments an submit each to the cluster for nanopolish correction
+Split the assembly into 50Kb fragments and submit each to the cluster for nanopolish correction
 
-
-for Assembly in $(ls assembly/SMARTdenovo/*/*/racon/racon_min_500bp_renamed.fasta); do
+FOP1-EMR
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/FOP1-EMR/racon/racon_min_500bp_renamed.fasta); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 echo "$Organism - $Strain"
 OutDir=$(dirname $Assembly)
-RawReads=$(ls raw_dna/minion/*/*/*.fastq.gz)
+RawReads=$(ls raw_dna/minion/*/FOP1-EMR/*.fastq.gz)
+AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
+
+NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish/nanopolish_range.txt
+
+Ploidy=1
+echo "nanopolish log:" > nanopolish_log.txt
+for Region in $(cat $OutDir/nanopolish/nanopolish_range.txt |  tail -n+2); do
+#Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+#while [ $Jobs -gt 1 ]; do
+#sleep 1m
+#printf "."
+#Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+#done		
+printf "\n"
+echo $Region
+echo $Region >> nanopolish_log.txt
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+done
+done
+```
+
+
+
+
+
+testing this script with 1 region!
+Assembly=$(ls assembly/SMARTdenovo/*/FOP1-EMR/racon/racon_min_500bp_renamed.fasta)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=$(dirname $Assembly)
+RawReads=$(ls raw_dna/minion/*/FOP1-EMR/*.fastq.gz)
+AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
+
+NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish/nanopolish_range.txt
+
+Ploidy=1
+echo "nanopolish log:" > nanopolish_log.txt
+Region=$(head -n1 $OutDir/nanopolish/nanopolish_range.txt)
+printf "\n"
+echo $Region
+echo $Region >> nanopolish_log.txt
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+
+
+
+
+
+
+
+
+
+
+
+
+F81
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/F81/racon/racon_min_500bp_renamed.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=$(dirname $Assembly)
+RawReads=$(ls raw_dna/minion/*/F81/*.fastq.gz)
 AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
 
 NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
@@ -611,19 +680,82 @@ python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish/nan
 Ploidy=1
 echo "nanopolish log:" > nanopolish_log.txt
 for Region in $(cat $OutDir/nanopolish/nanopolish_range.txt | tail -n+2); do
-Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
-while [ $Jobs -gt 1 ]; do
-sleep 1m
-printf "."
-Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
-done		
+#Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+#while [ $Jobs -gt 1 ]; do
+#sleep 1m
+#printf "."
+#Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+#done		
 printf "\n"
 echo $Region
 echo $Region >> nanopolish_log.txt
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
 qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
 done
 done
+```
+
+R2
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/R2/racon/racon_min_500bp_renamed.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+echo "$Organism - $Strain"
+OutDir=$(dirname $Assembly)
+RawReads=$(ls raw_dna/minion/*/R2/*.fastq.gz)
+AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
+
+NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish/nanopolish_range.txt
+
+Ploidy=1
+echo "nanopolish log:" > nanopolish_log.txt
+for Region in $(cat $OutDir/nanopolish/nanopolish_range.txt | tail -n+2); do
+#Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+#while [ $Jobs -gt 1 ]; do
+#sleep 1m
+#printf "."
+#Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+#done		
+printf "\n"
+echo $Region
+echo $Region >> nanopolish_log.txt
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+done
+done
+```
+
+
+
+
+
+for Assembly in $(ls assembly/SMARTdenovo/*/F81/racon/racon_min_500bp_renamed.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
+mkdir -p $OutDir
+# cat "" > $OutDir/"$Strain"_nanoplish.fa
+InDir=$(dirname $Assembly)
+NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanoplish.fa
+
+echo "" > tmp.txt
+ProgDir=~/git_repos/emr_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanoplish.fa --out $OutDir/"$Strain"_nanoplish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+done
+
+
+
+
+
+
+
+
+
+
+
+bwa index /home/groups/harrisonlab/project_files/fusarium_ex_pea/assembly/SMARTdenovo/F.oxysporum_fsp_pisi/FOP1-EMR/racon/nanopolish/reads.sorted.bam 2>&1 &
 
 
 
@@ -638,12 +770,10 @@ done
 
 
 
-
-This script is on andrews page (Fv_minion_assembly.md) if you look at the raw file on github. Dont run less SMARTdenovo isnt as good
+This script is on andrews page (Fv_minion_assembly.md) if you look at the raw file on github. Dont run unless SMARTdenovo isnt as good
 
 many steps above this need doing
 
-FIND WHERE THIS WAS FROM
 Hybrid assembly: Spades Assembly
 
 Reads1=$(ls qc_dna/minion/F.venenatum/WT/F.venenatum_WT_07-03-17_albacore_v2.02_trim.fastq.gz)
