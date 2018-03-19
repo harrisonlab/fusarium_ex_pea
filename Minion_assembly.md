@@ -667,6 +667,7 @@ done
 done
 ```
 
+
 FILES THAT NEEDED Re-submitting with sub_nanopolish_variants_high_mem.sh
 contig_14:200000-250200      job number 8479545
 
@@ -675,6 +676,27 @@ contig_38:50000-100200                  8479898
 contig_39:0-50200                       8479905
 
 contig_45:0-50200                       8479945
+
+contig_38:50040    reran contig_38:50000-100200 due to being missing jn:8485043
+
+
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/FOP1-EMR/racon/racon_min_500bp_renamed.fasta); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
+# cat "" > $OutDir/"$Strain"_nanopolish.fa
+InDir=$(dirname $Assembly)/nanopolish
+NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanopolish.fa
+
+echo "" > tmp.txt
+ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanopolish.fa --out $OutDir/"$Strain"_nanopolish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+done
+```
+
 
 
 
@@ -711,6 +733,8 @@ qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploi
 done
 done
 ```
+still running: contig_65:0-50200
+
 
 
 ```bash
@@ -718,14 +742,14 @@ for Assembly in $(ls assembly/SMARTdenovo/*/F81/racon/racon_min_500bp_renamed.fa
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
-# cat "" > $OutDir/"$Strain"_nanoplish.fa
-InDir=$(dirname $Assembly)
+# cat "" > $OutDir/"$Strain"_nanopolish.fa
+InDir=$(dirname $Assembly)/nanopolish
 NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
-python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanoplish.fa
+python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanopolish.fa
 
 echo "" > tmp.txt
 ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
-$ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanoplish.fa --out $OutDir/"$Strain"_nanoplish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanopolish.fa --out $OutDir/"$Strain"_nanopolish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
 done
 ```
 
@@ -763,47 +787,148 @@ done
 done
 ```
 
+
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/R2/racon/racon_min_500bp_renamed.fasta); do
 Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
 OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
-# cat "" > $OutDir/"$Strain"_nanoplish.fa
-InDir=$(dirname $Assembly)
+# cat "" > $OutDir/"$Strain"_nanopolish.fa
+InDir=$(dirname $Assembly)/nanopolish
 NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
-python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanoplish.fa
+python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanopolish.fa
 
 echo "" > tmp.txt
 ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
-$ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanoplish.fa --out $OutDir/"$Strain"_nanoplish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanopolish.fa --out $OutDir/"$Strain"_nanopolish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
 done
 ```
 
 
 
+### Quast and busco were run to assess the effects of nanopolish on assembly quality:
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*_nanopolish_min_500bp_renamed.fasta); do
+  Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+	# Quast
+  OutDir=$(dirname $Assembly)
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+  qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+	# Busco
+	BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+	OutDir=gene_pred/busco/$Organism/$Strain/nanopolish
+	ProgDir=/home/jenkis/git_repos/tools/gene_prediction/busco
+	qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+done
+```
 
 
 
+# Assemblies were polished using Pilon
+
+#### FOP1-EMR
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/FOP1-EMR/nanopolish/*_nanopolish_min_500bp_renamed.fasta); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
+echo $Strain
+echo $Organism
+TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz);
+TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz);
+echo $TrimF1_Read
+echo $TrimR1_Read
+OutDir=$(dirname $Assembly)
+Iterations=10
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
+done
+```
+
+#### F81
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/F81/nanopolish/*_nanopolish_min_500bp_renamed.fasta); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
+echo $Strain
+echo $Organism
+TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz);
+TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz);
+echo $TrimF1_Read
+echo $TrimR1_Read
+OutDir=$(dirname $Assembly)
+Iterations=10
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
+done
+```
 
 
+#### R2
+
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/R2/nanopolish/*_nanopolish_min_500bp_renamed.fasta); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
+echo $Strain
+echo $Organism
+TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz);
+TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz);
+echo $TrimF1_Read
+echo $TrimR1_Read
+OutDir=$(dirname $Assembly)
+Iterations=10
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
+done
+```
 
 
+## Summarising assemblies using quast:
+
+```bash
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/pilon_*.fasta | grep 'pilon_10'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+echo "$Organism - $Strain"
+OutDir=$(dirname $Assembly)
+qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
+```
 
 
+### Checking using busco
 
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/pilon_*.fasta); do
+  Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+  Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+  echo "$Organism - $Strain"
+  ProgDir=/home/jenkis/git_repos/tools/gene_prediction/busco
+  BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+  OutDir=gene_pred/busco/$Organism/"$Strain"_pilon/assembly
+  qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+done
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
+### remove contaminants from pilon_10
+```bash
+for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/pilon_*.fasta | grep 'pilon_10'); do
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+OutDir=$(dirname $Assembly)
+echo "" > tmp.txt
+ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/"$Strain"_pilon_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+done
+```
 
 
 
