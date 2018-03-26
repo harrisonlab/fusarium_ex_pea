@@ -970,4 +970,3 @@ Reads1=$(ls qc_dna/minion/F.venenatum/WT/F.venenatum_WT_07-03-17_albacore_v2.02_
   # done
   rm -r tmp_assembly
 ```
-
