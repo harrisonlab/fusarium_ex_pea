@@ -2,6 +2,7 @@
 
 ## Renaming RNAseq data and creating softlinks
 
+```bash
 cat sample_names.txt | while read Line; do
 Prefix=$(echo $Line | cut -d ' ' -f 1)
 SampNm=$(echo ${Line} | cut -d ' ' -f 2)
@@ -16,7 +17,7 @@ echo ${StrainName}
 ln -s -f /data/scratch/jenkis/RNAseq/F/${Prefix}_1.fastq.gz /home/groups/harrisonlab/project_files/fusarium_ex_pea/raw_rna/paired/F.oxysporum_fsp_pisi/${StrainName}/F/${Prefix}_${SampNm}_1.fastq.gz
 ln -s -f /data/scratch/jenkis/RNAseq/R/${Prefix}_2.fastq.gz /home/groups/harrisonlab/project_files/fusarium_ex_pea/raw_rna/paired/F.oxysporum_fsp_pisi/${StrainName}/R/${Prefix}_${SampNm}_2.fastq.gz
 done
-
+```
 
 ## Perform qc of RNAseq timecourse data
 
@@ -40,11 +41,12 @@ done
 
 Cegma was run on the Minion genomes for gene prediction before incorporating the RNAseq data to improve gene pred  
 
+```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*pilon_min_500bp_renamed.fasta); do
 ProgDir=/home/jenkis/git_repos/tools/gene_prediction/cegma
 qsub $ProgDir/sub_cegma.sh $Assembly dna
 done
-
+```
 
 
 
