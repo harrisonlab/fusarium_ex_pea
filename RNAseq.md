@@ -19,32 +19,33 @@ ln -s -f /data/scratch/jenkis/RNAseq/R/${Prefix}_2.fastq.gz /home/groups/harriso
 done
 ```
 
-## Perform qc of RNAseq timecourse data
+## Fastqc was performed on RNAseq data (using softlinks from above)
 
 ```bash    
 for FilePath in $(ls -d raw_rna/paired/F.oxysporum_fsp_pisi/*); do
-echo $FilePath
-FileNum=$(ls $FilePath/F/*.gz | wc -l)
-for num in $(seq 1 $FileNum); do
-FileF=$(ls $FilePath/F/*.gz | head -n $num | tail -n1)
-FileR=$(ls $FilePath/R/*.gz | head -n $num | tail -n1)
-echo $FileF
-echo $FileR
-IlluminaAdapters=/home/jenkis/git_repos/tools/seq_tools/ncbi_adapters.fa
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/rna_qc
-qsub $ProgDir/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
-done
+		echo $FilePath
+		FileNum=$(ls $FilePath/F/*.gz | wc -l)
+		for num in $(seq 1 $FileNum); do
+		FileF=$(ls $FilePath/F/*.gz | head -n $num | tail -n1)
+		FileR=$(ls $FilePath/R/*.gz | head -n $num | tail -n1)
+		echo $FileF
+		echo $FileR
+		IlluminaAdapters=/home/jenkis/git_repos/tools/seq_tools/ncbi_adapters.fa
+		ProgDir=/home/jenkis/git_repos/tools/seq_tools/rna_qc
+		qsub $ProgDir/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
+	done
 done
 ```  
-  
-## Cegma
+
+
+## Cegma
 
 Cegma was run on the Minion genomes for gene prediction before incorporating the RNAseq data to improve gene pred  
 
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*pilon_min_500bp_renamed.fasta); do
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/cegma
-qsub $ProgDir/sub_cegma.sh $Assembly dna
+	ProgDir=/home/jenkis/git_repos/tools/gene_prediction/cegma
+	qsub $ProgDir/sub_cegma.sh $Assembly dna
 done
 ```
 
