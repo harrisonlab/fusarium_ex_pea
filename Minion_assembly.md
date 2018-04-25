@@ -931,42 +931,276 @@ done
 ```
 
 
+## Repeatmasking
+
+Repeat masking was performed and used the following programs: Repeatmasker Repeatmodeler
 
 
-
-
-
-
-This script is on andrews page (Fv_minion_assembly.md) if you look at the raw file on github. Dont run unless SMARTdenovo isnt as good
-
-many steps above this need doing
-
-Hybrid assembly: Spades Assembly
 ```bash
-Reads1=$(ls qc_dna/minion/F.venenatum/WT/F.venenatum_WT_07-03-17_albacore_v2.02_trim.fastq.gz)
-  Reads2=$(ls qc_dna/minion/F.venenatum/WT/F.venenatum_WT_18-07-17_albacore_v2.02_trim.fastq.gz)
-  Organism=$(echo $Reads1 | head -n1 | rev | cut -f3 -d '/' | rev)
-  Strain=$(echo $Reads1 | head -n1 | rev | cut -f2 -d '/' | rev)
-  IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
-  echo $Strain
-  echo $Organism
-  TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz | head -n1 | tail -n1);
-  TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz | head -n1 | tail -n1);
-  TrimF2_Read=$(ls $IlluminaDir/F/*_trim.fq.gz | head -n2 | tail -n1);
-  TrimR2_Read=$(ls $IlluminaDir/R/*_trim.fq.gz | head -n2 | tail -n1);
-  TrimF3_Read=$(ls $IlluminaDir/F/*_trim.fq.gz | head -n3 | tail -n1);
-  TrimR3_Read=$(ls $IlluminaDir/R/*_trim.fq.gz | head -n3 | tail -n1);
-  echo $TrimF1_Read
-  echo $TrimR1_Read
-  echo $TrimF2_Read
-  echo $TrimR2_Read
-  echo $TrimF3_Read
-  echo $TrimR3_Read
-  OutDir=assembly/spades_minion/$Organism/"$Strain"_albacore_v2
-  # ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/spades/multiple_libraries
-  # qsub $ProgDir/subSpades_3lib_minion.sh tmp_assembly/miniondat.fastq.gz $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $TrimF3_Read $TrimR3_Read $OutDir
-  ProgDir=/home/armita/git_repos/emr_repos/scripts/fusarium_venenatum/assembly
-  qsub $ProgDir/Fv_spades_hybrid.sh $Reads1 $Reads2 $TrimF1_Read $TrimR1_Read $TrimF2_Read $TrimR2_Read $TrimF3_Read $TrimR3_Read $OutDir
-  # done
-  rm -r tmp_assembly
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/repeat_masking
+for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*pilon_min_500bp_renamed.fasta); do
+Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev | cut -f1 -d '_')
+echo "$Organism - $Strain"
+OutDir=repeat_masked/$Organism/"$Strain"_minion/minion_submission
+qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
+qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
+done
 ```
+
+
+The TransposonPSI masked bases were used to mask additional bases from the repeatmasker / repeatmodeller softmasked and hardmasked files.
+
+```bash
+for File in $(ls repeat_masked/*/*_minion/minion_submission/*_contigs_softmasked.fa); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+echo "Number of masked bases:"
+cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+done
+```
+repeat_masked/F.oxysporum_fsp_pisi/F81_minion/minion_submission/F81_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+8365149
+repeat_masked/F.oxysporum_fsp_pisi/FOP1-EMR_minion/minion_submission/FOP1-EMR_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+15957668
+repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa
+Number of masked bases:
+6139936
+
+
+```bash
+# The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
+for File in $(ls repeat_masked/*/*_minion/minion_submission/*_contigs_softmasked.fa); do
+OutDir=$(dirname $File)
+TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
+echo "$OutFile"
+bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
+done
+```
+
+```bash
+for RepDir in $(ls -d repeat_masked/*/*/minion_submission); do
+Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
+RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
+TransPSIGff=$(ls $RepDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+# printf "The number of bases masked by RepeatMasker:\t"   (1)
+RepMaskerBp=$(sortBed -i $RepMaskGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}')
+# printf "The number of bases masked by TransposonPSI:\t"   (2)
+TpsiBp=$(sortBed -i $TransPSIGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}')
+# printf "The total number of masked bases are:\t"    (3)
+Total=$(cat $RepMaskGff $TransPSIGff | sortBed | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}')
+printf "$Organism\t$Strain\t$RepMaskerBp\t$TpsiBp\t$Total\n"
+done
+```
+
+                                                 (1)       (2)        (3)
+F.oxysporum_fsp_pisi	F81_minion	           7995945	 3124871	8365149
+F.oxysporum_fsp_pisi	FOP1-EMR_minion	      15588012	 6311810	15957668
+F.oxysporum_fsp_pisi	R2_minion	           5751282	 2309548	6139936
+
+
+
+# Gene prediction of Minion genomes
+
+## Renaming RNAseq data and creating softlinks
+
+```bash
+cat sample_names.txt | while read Line; do
+Prefix=$(echo $Line | cut -d ' ' -f 1)
+SampNm=$(echo ${Line} | cut -d ' ' -f 2)
+SampNm=${SampNm/Sample:/}
+StrainName=$(echo ${SampNm} | sed -r '/^.._(.*).$/ s//\1/')
+echo ${StrainName} 
+#cp /data/scratch/jenkis/RNAseq/F/${Prefix}_1.fastq.gz /data/scratch/jenkis/RNAseq/renamed/F/${Prefix}_${SampNm}_1.fastq.gz
+#cp /data/scratch/jenkis/RNAseq/R/${Prefix}_2.fastq.gz /data/scratch/jenkis/RNAseq/renamed/R/${Prefix}_${SampNm}_2.fastq.gz
+#mkdir /home/groups/harrisonlab/project_files/fusarium_ex_pea/raw_rna/paired/F.oxysporum_fsp_pisi/${StrainName}
+#mkdir /home/groups/harrisonlab/project_files/fusarium_ex_pea/raw_rna/paired/F.oxysporum_fsp_pisi/${StrainName}/F/
+#mkdir /home/groups/harrisonlab/project_files/fusarium_ex_pea/raw_rna/paired/F.oxysporum_fsp_pisi/${StrainName}/R/
+ln -s -f /data/scratch/jenkis/RNAseq/F/${Prefix}_1.fastq.gz /home/groups/harrisonlab/project_files/fusarium_ex_pea/raw_rna/paired/F.oxysporum_fsp_pisi/${StrainName}/F/${Prefix}_${SampNm}_1.fastq.gz
+ln -s -f /data/scratch/jenkis/RNAseq/R/${Prefix}_2.fastq.gz /home/groups/harrisonlab/project_files/fusarium_ex_pea/raw_rna/paired/F.oxysporum_fsp_pisi/${StrainName}/R/${Prefix}_${SampNm}_2.fastq.gz
+done
+```
+
+## Fastq-mcf was performed on RNAseq data (using softlinks from above)  (need to use the while loop as too many jobs were being added to the cluster at once, people having to queue)
+
+```bash    
+for FilePath in $(ls -d raw_rna/paired/F.oxysporum_fsp_pisi/*); do
+Jobs=$(qstat | grep 'rna_qc_' | wc -l)
+while [ $Jobs -gt 4 ]; do
+sleep 1m
+printf "."
+Jobs=$(qstat | grep 'rna_qc_' | wc -l)
+done
+FileNum=$(ls $FilePath/F/*.gz | wc -l)
+for num in $(seq 1 $FileNum); do
+FileF=$(ls $FilePath/F/*.gz | head -n $num | tail -n1)
+FileR=$(ls $FilePath/R/*.gz | head -n $num | tail -n1)
+echo $FileF
+echo $FileR
+IlluminaAdapters=/home/jenkis/git_repos/tools/seq_tools/ncbi_adapters.fa
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/rna_qc
+qsub $ProgDir/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
+done
+done
+```  
+
+find output in qc_rna_
+
+
+### Ran fastqc on trimmed RNAseq data (output from rna_qc_fastq-mcf.sh)
+```bash
+for RawData in qc_rna/paired/F.oxysporum_fsp_pisi/*/*/*.fq.gz; do
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+echo $RawData;
+qsub $ProgDir/run_fastqc.sh $RawData
+done
+```
+FIND HERE: ls qc_rna/paired/F.oxysporum_fsp_pisi/96hrsFOP1EMRS/R/
+ 
+ 
+ 
+## Aligning to pea transcriptome
+
+Aligning RNAseq data to one file from the pea transcriptome (there were 6 files in total downloaded from Sudheesh et al 2015 from NCBI: Parafield - GCKA00000000, GCMM00000000, GCMN00000000, GCMO00000000, GCMP00000000 and GCMQ00000000)
+
+
+```bash
+for Assembly in $(ls ../../../../../home/jenkis/popgen/rnaseq/pea_transcriptome.fa); do
+#for Assembly in $(ls ../../../../../home/jenkis/popgen/rnaseq/GCMM01.1.fsa_nt); do
+echo "$Assembly"
+for RNADir in $(ls -d qc_rna/paired/*/*); do
+#for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_pisi/96hrsFOP1EMRS); do
+FileNum=$(ls $RNADir/F/*.fq.gz | wc -l)
+for num in $(seq 1 $FileNum); do
+printf "\n"
+FileF=$(ls $RNADir/F/*.fq.gz | head -n $num | tail -n1)
+FileR=$(ls $RNADir/R/*.fq.gz | head -n $num | tail -n1)
+echo $FileF
+echo $FileR
+Prefix=$(echo $FileF | rev | cut -f1 -d '/' | rev | sed "s/_1_trim.fq.gz//g")
+#Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+#echo "$Timepoint"
+OutDir=alignment/star/pea_transcriptome/v1.1/$Prefix
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_star_unmapped.sh $Assembly $FileF $FileR $OutDir
+done
+done
+done
+```
+
+(to restrict to one run of fastq.gz leave FileF and FileR as they are and write put FileNum=1 or for num in $(seq 1 1); do   or something similar)
+if you want to output job numbers and associated files to a separate file do this on last done:
+done > filename.txt
+
+
+
+### gzip files:
+```bash
+for File in $(ls -d alignment/star/pea_transcriptome/v1.1/*/*.mate*); do
+echo $File
+cat $File | gzip -cf > $File.fq.gz
+done
+```
+
+
+
+### Aligning to minion assemblies  
+
+Those RNAseq sequences that didn't align to the pea genome were aligned to the minion assemblies
+
+Run twice for each isolate assembly using trimmed output from gzip (mate1/2) for 1 replicate of infected (96hrs) and 1 replicate of mycelium
+
+Job number: 8504420  
+```bash
+Assembly=$(ls repeat_masked/F.oxysporum_fsp_pisi/FOP1-EMR_minion/minion_submission/FOP1-EMR_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+FileF=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_001_28_96hrsFOP1EMRS1/star_aligmentUnmapped.out.mate1.fq.gz)
+FileR=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_001_28_96hrsFOP1EMRS1/star_aligmentUnmapped.out.mate2.fq.gz)
+OutDir=alignment/star/F.oxysporum_fsp_pisi/FOP1-EMR/WTCHG_455357_001_28_96hrsFOP1EMRS1
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_star.sh $Assembly $FileF $FileR $OutDir
+```
+
+Job number: 8504448
+```bash
+Assembly=$(ls repeat_masked/F.oxysporum_fsp_pisi/FOP1-EMR_minion/minion_submission/FOP1-EMR_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+FileF=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_010_37_FOP1EMR2/star_aligmentUnmapped.out.mate1.fq.gz)
+FileR=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_010_37_FOP1EMR2/star_aligmentUnmapped.out.mate2.fq.gz)
+OutDir=alignment/star/F.oxysporum_fsp_pisi/FOP1-EMR/WTCHG_455357_010_37_FOP1EMR2
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_star.sh $Assembly $FileF $FileR $OutDir
+```
+
+
+Job number: 8504455
+```bash 
+Assembly=$(ls repeat_masked/F.oxysporum_fsp_pisi/F81_minion/minion_submission/F81_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+FileF=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_004_31_96hrsF81S1/star_aligmentUnmapped.out.mate1.fq.gz)
+FileR=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_004_31_96hrsF81S1/star_aligmentUnmapped.out.mate2.fq.gz)
+OutDir=alignment/star/F.oxysporum_fsp_pisi/F81/WTCHG_455357_004_31_96hrsF81S1
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_star.sh $Assembly $FileF $FileR $OutDir
+```
+
+
+Job number: 8504456
+```bash 
+Assembly=$(ls repeat_masked/F.oxysporum_fsp_pisi/F81_minion/minion_submission/F81_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+FileF=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_013_40_F811/star_aligmentUnmapped.out.mate1.fq.gz)
+FileR=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_013_40_F811/star_aligmentUnmapped.out.mate2.fq.gz)
+OutDir=alignment/star/F.oxysporum_fsp_pisi/F81/WTCHG_455357_013_40_F811
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_star.sh $Assembly $FileF $FileR $OutDir
+```
+
+Job number: 8504457
+```bash 
+Assembly=$(ls repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+FileF=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_007_34_96hrsR2S1/star_aligmentUnmapped.out.mate1.fq.gz)
+FileR=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_007_34_96hrsR2S1/star_aligmentUnmapped.out.mate2.fq.gz)
+OutDir=alignment/star/F.oxysporum_fsp_pisi/R2/WTCHG_455357_007_34_96hrsR2S1
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_star.sh $Assembly $FileF $FileR $OutDir
+
+
+Job number: 8504458 
+```bash 
+Assembly=$(ls repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+FileF=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_016_43_R21/star_aligmentUnmapped.out.mate1.fq.gz)
+FileR=$(ls alignment/star/pea_transcriptome/v1.1/WTCHG_455357_016_43_R21/star_aligmentUnmapped.out.mate2.fq.gz)
+OutDir=alignment/star/F.oxysporum_fsp_pisi/R2/WTCHG_455357_016_43_R21
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
+qsub $ProgDir/sub_star.sh $Assembly $FileF $FileR $OutDir
+```
+
+
+
+
+RUN THIS- change
+Alignments were concatenated prior to gene prediction
+```bash
+BamFiles=$(ls alignment/star/P.cactorum/414/*/*/star_aligmentAligned.sortedByCoord.out.bam | grep -v -e 'PRO1467_S1_' -e 'PRO1467_S2_' -e 'PRO1467_S3_' -e 'PRO1467_S10_' -e 'PRO1467_S11_' -e 'PRO1467_S12_' | tr -d '\n' | sed 's/.bam/.bam /g')
+OutDir=alignment/star/P.cactorum/414/concatenated
+mkdir -p $OutDir
+samtools merge -f $OutDir/concatenated.bam $BamFiles
+```
+
+
+BRAKER 
+
+
+
+check top ten lines of fastq.gz file:
+```bash
+cat WTCHG_455357_002_1.fastq.gz | gunzip -cf | head -n10 
+```
+
+
+
+
