@@ -1255,6 +1255,7 @@ done
 
 
 8505619 Andrew had to run these as i couldnt get it working 
+```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/FOP1-EMR_minion/minion_submission/FOP1-EMR_contigs_softmasked_repeatmasker_TPSI_appended.fa); do 
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
@@ -1266,7 +1267,7 @@ rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName
 ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
 qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 done
-
+```
 
 
 
@@ -1348,7 +1349,7 @@ Firstly, aligned RNAseq data was assembled into transcripts using Cufflinks.
 Note - cufflinks doesn't always predict direction of a transcript and therefore features can not be restricted by strand when they are intersected.
 
 
-FOP1 EMR     8505783
+FOP1 EMR     jn=8505783
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/FOP1-EMR_minion/minion_submission/FOP1-EMR_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
@@ -1362,7 +1363,7 @@ qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
 done
 ```
 
-F81      8505784
+F81      jn=8505784
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/F81_minion/minion_submission/F81_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
@@ -1376,7 +1377,7 @@ qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
 done
 ```
 
-R2     8505785
+R2     jn=8505785
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
@@ -1394,7 +1395,7 @@ done
 
 ### Secondly, genes were predicted using CodingQuary:
 
-FOP1-EMR    8506672
+FOP1-EMR    jn=8506672
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/FOP1-EMR_minion/minion_submission/FOP1-EMR_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
@@ -1408,7 +1409,7 @@ done
 ```
 
 
-F81    8506764
+F81    jn=8506764
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/F81_minion/minion_submission/F81_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
@@ -1422,7 +1423,7 @@ done
 ```
 
 
-R2     8506783
+R2     jn=8506783
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
@@ -1435,7 +1436,7 @@ qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
 done
 ```
 
-# Then, additional transcripts were added to Braker gene models, when CodingQuary genes were predicted in regions of the genome not containing Braker gene models:
+### Then, additional transcripts were added to Braker gene models, when CodingQuary genes were predicted in regions of the genome not containing Braker gene models:
 Done for each genome FOP1 EMR, F81 and R2
 ```bash
 for BrakerGff in $(ls gene_pred/braker/F.oxysporum_fsp_pisi/R2_minion_braker_ADA/F.oxysporum_fsp_pisi_R2_minion_braker_ADA/augustus.gff3); do
@@ -1629,11 +1630,12 @@ Your job 8567956 ("sub_busco3.sh") has been submitted
  echo -e "$Organism\t$Strain\t$Complete\t$Single\t$Fragmented\t$Missing\t$Total"
  done
 ```
+```
  										Complete	Single	Fragmented Missing	Total
 F.oxysporum_fsp_pisi	F81_minion	    3673		3639		40		12		3725
 F.oxysporum_fsp_pisi	FOP1-EMR_minion	3668		3636		43		14		3725
 F.oxysporum_fsp_pisi	R2_minion	    3666		3630		42		17		3725
-
+```
 
 
 
@@ -1702,13 +1704,17 @@ Required programs:
 - TMHMM
 
 
-**************RUN********************** fix first
-Proteins that were predicted to contain signal peptides were identified using the following commands:
-ran in screen 24377.pts-0.bio72
+
+### Proteins that were predicted to contain signal peptides were identified using the following commands:
+
 ```bash
-for Proteome in $(ls gene_pred/final/*/F81_minion/final/final_genes_appended_renamed.pep.fasta); do
-SplitfileDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+#for Proteome in $(ls gene_pred/final/*/FOP1-EMR_minion/final/final_genes_appended_renamed.pep.fasta); do
+for Proteome in $(ls gene_pred/final/*/R2_minion/final/final_genes_appended_renamed.pep.fasta); do
+#for Proteome in $(ls gene_pred/final/*/F81_minion/final/final_genes_appended_renamed.pep.fasta); do
+SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+#SplitfileDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+#ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
 SplitDir=gene_pred/braker_split/$Organism/$Strain
@@ -1716,6 +1722,7 @@ mkdir -p $SplitDir
 BaseName="$Organism""_$Strain"_braker_preds
 $SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
 for File in $(ls $SplitDir/*_braker_preds_*); do
+#for File in $(ls $SplitDir/*_braker_preds_* | head -1); do
 Jobs=$(qstat | grep 'pred_sigP' | wc -l)
 while [ $Jobs -gt '20' ]; do
 sleep 10
@@ -1726,59 +1733,39 @@ printf "\n"
 echo $File
 qsub $ProgDir/pred_sigP.sh $File signalp-4.1
 done
+done >pred_sigp_R2.txt
+```
+
+
+#### The batch files of predicted secreted proteins needed to be combined into a single file for each strain. This was done with the following commands:
+```bash
+for SplitDir in $(ls -d gene_pred/braker_split/*/*); do
+Strain=$(echo $SplitDir | cut -d '/' -f4)
+Organism=$(echo $SplitDir | cut -d '/' -f3)
+InStringAA=''
+InStringNeg=''
+InStringTab=''
+InStringTxt=''
+SigpDir=braker_signalp-4.1
+echo "$Organism - $Strain"
+for GRP in $(ls -l $SplitDir/*_braker_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.aa";  
+InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp_neg.aa";  
+InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.tab";
+InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.txt";  
+done
+cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
+cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
+tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
+cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
 done
 ```
 
 
-F.oxysporum_fsp_pisi_F81_minion_braker_preds_10000.fa
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-************RUNNNNNNN****************** change first
-The batch files of predicted secreted proteins needed to be combined into a single file for each strain. This was done with the following commands:
-
-  for SplitDir in $(ls -d gene_pred/braker_split/*/*); do
-    Strain=$(echo $SplitDir | cut -d '/' -f4)
-    Organism=$(echo $SplitDir | cut -d '/' -f3)
-    InStringAA=''
-    InStringNeg=''
-    InStringTab=''
-    InStringTxt=''
-    SigpDir=braker_signalp-4.1
-    echo "$Organism - $Strain"
-    for GRP in $(ls -l $SplitDir/*_braker_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
-      InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.aa";  
-      InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp_neg.aa";  
-      InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.tab";
-      InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.txt";  
-    done
-    cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
-    cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
-    tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
-    cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
-  done
-
-
-
+### Proteins containing a transmembrane domain were identified:
 
 Some proteins that are incorporated into the cell membrane require secretion. Therefore proteins with a transmembrane domain are not likely to represent cytoplasmic or apoplastic effectors.
 
-Proteins containing a transmembrane domain were identified:
 ```bash
 for Proteome in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.pep.fasta); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
@@ -1794,10 +1781,12 @@ Your job 8568138 ("submit_TMHMM.sh") has been submitted
 
 
 
-***********RUNNNNNNNNN********************** change first
-Those proteins with transmembrane domains were removed from lists of Signal peptide containing proteins
 
-for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt); do
+#### Those proteins with transmembrane domains were removed from lists of Signal peptide containing proteins
+Done for each isolate FOP1 EMR, F81, R2
+```bash
+#for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt); do
+for File in $(ls gene_pred/trans_mem/*/R2_minion/*_TM_genes_neg.txt); do
 Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
 Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
 # echo "$Organism - $Strain"
@@ -1805,7 +1794,7 @@ NonTmHeaders=$(echo "$File" | sed 's/neg.txt/neg_headers.txt/g')
 cat $File | cut -f1 > $NonTmHeaders
 SigP=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/"$Strain"_aug_sp.aa)
 OutDir=$(dirname $SigP)
-ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
+ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
 $ProgDir/extract_from_fasta.py --fasta $SigP --headers $NonTmHeaders > $OutDir/"$Strain"_final_sp_no_trans_mem.aa
 # echo "Number of SigP proteins:"
 TotalProts=$(cat $SigP | grep '>' | wc -l)
@@ -1819,8 +1808,15 @@ TmHeaders=$(echo $PosFile | sed 's/.txt/_headers.txt/g')
 cat $PosFile | cut -f1 > $TmHeaders
 printf "$Organism\t$Strain\t$TotalProts\t$SecProt\t$SecGene\n"
 done
-
-
+```
+```bash
+										no SigP      No. without      No. gene 
+									    proteins	transmembrane 	   models
+														domains
+F.oxysporum_fsp_pisi	F81_minion			1873		1546			1538
+F.oxysporum_fsp_pisi	FOP1-EMR_minion		1691		1390			1385
+F.oxysporum_fsp_pisi	R2_minion			1816		1492			1487
+```	
 
 
 ## C) From Augustus gene models - Effector identification using EffectorP
@@ -1844,76 +1840,90 @@ Your job 8568141 ("pred_effectorP.sh") has been submitted
 
 
 
-Those genes that were predicted as secreted and tested positive by effectorP were identified:
+#### Those genes that were predicted as secreted and tested positive by effectorP were identified:
 
 Note - this doesnt exclude proteins with TM domains or GPI anchors
 
+Ran for FOP1-EMR, F81 and R2
+```bash
+for File in $(ls analysis/effectorP/*/R2_minion/*_EffectorP.txt); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+echo "$Organism - $Strain"
+Headers=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_headers.txt/g')
+cat $File | grep 'Effector' | grep -v 'Effector probability:' | cut -f1 > $Headers
+printf "EffectorP headers:\t"
+cat $Headers | wc -l
+Secretome=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
+OutFile=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
+ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
+OutFileHeaders=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted_headers.txt/g')
+cat $OutFile | grep '>' | tr -d '>' > $OutFileHeaders
+printf "Secreted effectorP headers:\t"
+cat $OutFileHeaders | wc -l
+Gff=$(ls gene_pred/final/$Organism/$Strain/*/final_genes_appended_renamed.gff3)
+EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
+ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
+done
+```
+```bash
+F.oxysporum_fsp_pisi - F81_minion
+EffectorP headers:	3406
+Secreted effectorP headers:	341
 
-********RUN****** change first
-  for File in $(ls analysis/effectorP/*/*/*_EffectorP.txt); do
-    Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
-    Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
-    echo "$Organism - $Strain"
-    Headers=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_headers.txt/g')
-    cat $File | grep 'Effector' | grep -v 'Effector probability:' | cut -f1 > $Headers
-    printf "EffectorP headers:\t"
-    cat $Headers | wc -l
-    Secretome=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
-    OutFile=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
-    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-    $ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
-    OutFileHeaders=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted_headers.txt/g')
-    cat $OutFile | grep '>' | tr -d '>' > $OutFileHeaders
-    printf "Secreted effectorP headers:\t"
-    cat $OutFileHeaders | wc -l
-    Gff=$(ls gene_pred/final/$Organism/$Strain/*/final_genes_appended_renamed.gff3)
-    EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
-    ProgDir=/home/armita/git_repos/emr_repos/tools/gene_prediction/ORF_finder
-    $ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
-  done
+F.oxysporum_fsp_pisi - FOP1-EMR_minion
+EffectorP headers:	3750
+Secreted effectorP headers:	340
+
+F.oxysporum_fsp_pisi - R2_minion
+EffectorP headers:	3188
+Secreted effectorP headers:	336
+```
 
 
-A.alternata_ssp_tenuissima - 1166
-EffectorP headers:	1970
-Secreted effectorP headers:	248
-A.gaisen - 650
-EffectorP headers:	1921
-Secreted effectorP headers:	247
 
-
-*****************change and run*******************
-SSCP
+## SSCP
 
 Small secreted cysteine rich proteins were identified within secretomes. These proteins may be identified by EffectorP, but this approach allows direct control over what constitutes a SSCP.
-
-for Secretome in $(ls gene_pred/braker_signalp-4.1/*/*/*_final_sp_no_trans_mem.aa); do
+Done for FOP1 EMR, F81 and R2
+```bash
+for Secretome in $(ls gene_pred/braker_signalp-4.1/*/R2_minion/*_final_sp_no_trans_mem.aa); do
 Strain=$(echo $Secretome| rev | cut -f2 -d '/' | rev)
 Organism=$(echo $Secretome | rev | cut -f3 -d '/' | rev)
 echo "$Organism - $Strain"
 OutDir=analysis/sscp/$Organism/$Strain
 mkdir -p $OutDir
-ProgDir=/home/armita/git_repos/emr_repos/tools/pathogen/sscp
+ProgDir=/home/jenkis/git_repos/tools/pathogen/sscp
 $ProgDir/sscp_filter.py --inp_fasta $Secretome --max_length 300 --threshold 3 --out_fasta $OutDir/"$Strain"_sscp_all_results.fa
 cat $OutDir/"$Strain"_sscp_all_results.fa | grep 'Yes' > $OutDir/"$Strain"_sscp.fa
 printf "number of SSC-rich genes:\t"
 cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' | cut -f1 -d '.' | sort | uniq | wc -l
 done
+```
+```bash
+F.oxysporum_fsp_pisi - F81_minion
+	% cysteine content threshold set to:	3
+	maximum length set to:	300
+	No. short-cysteine rich proteins in input fasta:	282
+	number of SSC-rich genes:	282
+	
+F.oxysporum_fsp_pisi - FOP1-EMR_minion
+	% cysteine content threshold set to:	3
+	maximum length set to:	300
+	No. short-cysteine rich proteins in input fasta:	269
+	number of SSC-rich genes:	267
+
+F.oxysporum_fsp_pisi - R2_minion
+	% cysteine content threshold set to:	3
+	maximum length set to:	300
+	No. short-cysteine rich proteins in input fasta:	281
+	number of SSC-rich genes:	280
+```
 
 
-A.alternata_ssp_tenuissima - 1166
-% cysteine content threshold set to:	3
-maximum length set to:	300
-No. short-cysteine rich proteins in input fasta:	202
-number of SSC-rich genes:	202
-A.gaisen - 650
-% cysteine content threshold set to:	3
-maximum length set to:	300
-No. short-cysteine rich proteins in input fasta:	197
-number of SSC-rich genes:	196
-
-
-
-## CAZY proteins     RUN rest of CAZY stuff on Alternaria minion page**************
+## CAZY proteins 
 
 Carbohydrte active enzymes were idnetified using CAZY following recomendations at http://csbl.bmb.uga.edu/dbCAN/download/readme.txt :
 
@@ -1932,6 +1942,153 @@ done
 Your job 8568142 ("sub_hmmscan.sh") has been submitted
 Your job 8568143 ("sub_hmmscan.sh") has been submitted
 Your job 8568144 ("sub_hmmscan.sh") has been submitted
+
+
+The Hmm parser was used to filter hits by an E-value of E1x10-5 or E1x10-e3 if they had a hit over a length of X %.
+
+Those proteins with a signal peptide were extracted from the list and gff files representing these proteins made.
+Done for F81, FOP1-EMR and R2
+```bash
+for File in $(ls gene_pred/CAZY/*/R2_minion/*CAZY.out.dm); do
+Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+OutDir=$(dirname $File)
+# echo "$Organism - $Strain"
+ProgDir=/home/groups/harrisonlab/dbCAN
+$ProgDir/hmmscan-parser.sh $OutDir/"$Strain"_CAZY.out.dm > $OutDir/"$Strain"_CAZY.out.dm.ps
+CazyHeaders=$(echo $File | sed 's/.out.dm/_headers.txt/g')
+cat $OutDir/"$Strain"_CAZY.out.dm.ps | cut -f3 | sort | uniq > $CazyHeaders
+# echo "number of CAZY proteins identified:"
+TotalProts=$(cat $CazyHeaders | wc -l)
+# Gff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
+Gff=$(ls gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
+CazyGff=$OutDir/"$Strain"_CAZY.gff
+ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
+$ProgDir/extract_gff_for_sigP_hits.pl $CazyHeaders $Gff CAZyme ID > $CazyGff
+# echo "number of CAZY genes identified:"
+TotalGenes=$(cat $CazyGff | grep -w 'gene' | wc -l)
+
+SecretedProts=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
+SecretedHeaders=$(echo $SecretedProts | sed 's/.aa/_headers.txt/g')
+cat $SecretedProts | grep '>' | tr -d '>' > $SecretedHeaders
+CazyGffSecreted=$OutDir/"$Strain"_CAZY_secreted.gff
+$ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $CazyGff Secreted_CAZyme ID > $CazyGffSecreted
+# echo "number of Secreted CAZY proteins identified:"
+cat $CazyGffSecreted | grep -w 'mRNA' | cut -f9 | tr -d 'ID=' | cut -f1 -d ';' > $OutDir/"$Strain"_CAZY_secreted_headers.txt
+SecProts=$(cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | wc -l)
+# echo "number of Secreted CAZY genes identified:"
+SecGenes=$(cat $CazyGffSecreted | grep -w 'gene' | wc -l)
+# cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | cut -f1 -d '.' | sort | uniq | wc -l
+printf "$Organism\t$Strain\t$TotalProts\t$TotalGenes\t$SecProts\t$SecGenes\n"
+done
+```
+```bash
+F.oxysporum_fsp_pisi	F81_minion		986	986	418	418
+F.oxysporum_fsp_pisi	FOP1-EMR_minion	861	861	343	343
+F.oxysporum_fsp_pisi	R2_minion		972	972	412	412
+```
+
+
+
+Note - the CAZY genes identified may need further filtering based on e value and cuttoff length - see below:
+
+Cols in yourfile.out.dm.ps:
+
+	- Family HMM
+	- HMM length
+	- Query ID
+	- Query length
+	- E-value (how similar to the family HMM)
+	- HMM start
+	- HMM end
+	- Query start
+	- Query end
+	- Coverage
+
+For fungi, use E-value < 1e-17 and coverage > 0.45
+
+The best threshold varies for different CAZyme classes (please see http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4132414/ for details). Basically to annotate GH proteins, one should use a very relax coverage cutoff or the sensitivity will be low (Supplementary Tables S4 and S9); (ii) to annotate CE families a very stringent E-value cutoff and coverage cutoff should be used; otherwise the precision will be very low due to a very high false positive rate (Supplementary Tables S5 and S10)
+
+
+### Summary of CAZY families by organism
+
+```bash
+for CAZY in $(ls gene_pred/CAZY/*/R2_minion/*_CAZY.out.dm.ps); do
+Strain=$(echo $CAZY | rev | cut -f2 -d '/' | rev)
+Organism=$(echo $CAZY | rev | cut -f3 -d '/' | rev)
+OutDir=$(dirname $CAZY)
+echo "$Organism - $Strain"
+Secreted=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem_headers.txt)
+Gff=$(ls gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
+ProgDir=/home/jenkis/git_repos/tools/pathogen/CAZY
+$ProgDir/summarise_CAZY.py --cazy $CAZY --inp_secreted $Secreted --inp_gff $Gff --summarise_family --trim_gene_id 2 --kubicek_2014
+done
+```
+```bash
+F.oxysporum_fsp_pisi - F81_minion
+	B-Galactosidases - 2
+	A-Galactosidases - 4
+	Polygalacturonase - 16
+	A-Arabinosidases - 25
+	Xylanases - 9
+	Polygalacturonate lyases - 24
+	B-Glucuronidases - 4
+	B-Glycosidases - 15
+	Cellulases - 22
+	other - 296
+	Xyloglucanases - 1
+
+F.oxysporum_fsp_pisi - FOP1-EMR_minion
+	B-Galactosidases - 2
+	A-Galactosidases - 3
+	Polygalacturonase - 9
+	A-Arabinosidases - 17
+	Xylanases - 8
+	Polygalacturonate lyases - 21
+	B-Glucuronidases - 2
+	B-Glycosidases - 11
+	Cellulases - 16
+	other - 253
+	Xyloglucanases - 1
+
+F.oxysporum_fsp_pisi - R2_minion
+	B-Galactosidases - 1
+	A-Galactosidases - 4
+	Polygalacturonase - 16
+	A-Arabinosidases - 23
+	Xylanases - 11
+	Polygalacturonate lyases - 25
+	B-Glucuronidases - 4
+	B-Glycosidases - 13
+	Cellulases - 21
+	other - 292
+	Xyloglucanases - 1
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
