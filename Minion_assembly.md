@@ -2051,8 +2051,7 @@ F.oxysporum_fsp_pisi - R2_minion
 
 
 
-
-
+Look at Minion_orthology.md for orthology analysis
 
 
 
