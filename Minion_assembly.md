@@ -187,14 +187,14 @@ qsub ${ProgDir}run_fastqc.sh ../raw_dna/paired/F.oxysporum_fsp_pisi/R2/F/R2_S1_L
 ## Identifying read depth
 
 ```bash
-	for Reads in $(ls raw_dna/minion/*/*/*.fastq.gz); do
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
-		qsub $ProgDir/sub_count_nuc.sh 52 $Reads
-		done
-	for Reads in $(ls raw_dna/paired/*/*/*/*.fastq.gz); do
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
-		qsub $ProgDir/sub_count_nuc.sh 52 $Reads
-		done
+for Reads in $(ls raw_dna/minion/*/*/*.fastq.gz); do
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+	qsub $ProgDir/sub_count_nuc.sh 52 $Reads
+	done
+for Reads in $(ls raw_dna/paired/*/*/*/*.fastq.gz); do
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+	qsub $ProgDir/sub_count_nuc.sh 52 $Reads
+	done
 ```
 
 The results for this are in fusarium_ex_pea and are *_cov.txt files. To look at all the results from coverage estimation script you can search for the last line and display that:
@@ -203,6 +203,7 @@ The results for this are in fusarium_ex_pea and are *_cov.txt files. To look at 
 cd /home/groups/harrisonlab/project_files/fusarium_ex_pea
 grep "equates" *_cov.txt
 ```
+```bash
 illumina: 
 F81_S3_L001_R1_001_cov.txt: This equates to an estimated genome coverage of 29.67 .
 F81_S3_L001_R2_001_cov.txt: This equates to an estimated genome coverage of 29.67 .
@@ -215,53 +216,53 @@ Minion:
 F.oxysporum_fsp_pisi_F81_2017-05-17_albacore_v2.02_cov.txt: This equates to an estimated genome coverage of 44.07 .
 F.oxysporum_fsp_pisi_FOP1-EMR_2017-07-11_albacore_v2.02_cov.txt: This equates to an estimated genome coverage of 62.54 .
 F.oxysporum_fsp_pisi_R2_2017-05-17_albacore_v2.02_cov.txt: This equates to an estimated genome coverage of 47.35 .
-
+```
 
 
 
 ## Splitting reads and trimming adapters using porechop (minion)
 
 ```bash
-	for RawReads in $(ls raw_dna/minion/*/*/*.fastq.gz); do
-		Strain=$(echo $RawReads | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $RawReads | rev | cut -f3 -d '/' | rev)
-		echo "$Organism - $Strain"
-		OutDir=qc_dna/minion/$Organism/$Strain
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
-		qsub $ProgDir/sub_porechop.sh $RawReads $OutDir
-	done
+for RawReads in $(ls raw_dna/minion/*/*/*.fastq.gz); do
+	Strain=$(echo $RawReads | rev | cut -f2 -d '/' | rev)
+	Organism=$(echo $RawReads | rev | cut -f3 -d '/' | rev)
+	echo "$Organism - $Strain"
+	OutDir=qc_dna/minion/$Organism/$Strain
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+	qsub $ProgDir/sub_porechop.sh $RawReads $OutDir
+done
 ```
 
 
 ## Trimming was aslo performed on all illumina seqs using fastq-mcf
 
 ```bash
-	for StrainPath in $(ls -d raw_dna/paired/*/*); do
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/rna_qc
-		IlluminaAdapters=/home/jenkis/git_repos/tools/seq_tools/ncbi_adapters.fa
-		ReadsF=$(ls $StrainPath/F/*.fastq*)
-		ReadsR=$(ls $StrainPath/R/*.fastq*)
-		echo $ReadsF
-		echo $ReadsR
-		qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
-	done
-
+for StrainPath in $(ls -d raw_dna/paired/*/*); do
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/rna_qc
+	IlluminaAdapters=/home/jenkis/git_repos/tools/seq_tools/ncbi_adapters.fa
+	ReadsF=$(ls $StrainPath/F/*.fastq*)
+	ReadsR=$(ls $StrainPath/R/*.fastq*)
+	echo $ReadsF
+	echo $ReadsR
+	qsub $ProgDir/rna_qc_fastq-mcf.sh $ReadsF $ReadsR $IlluminaAdapters DNA
+done
+```
 
 
 ## Read coverage was estimated from the trimmed datasets:
 
 ```bash
 	GenomeSz=52
-	for Reads in $(ls qc_dna/minion/*/*/*_trim.fastq.gz); do
-		echo $Reads
-		OutDir=$(dirname $Reads)
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
-		qsub $ProgDir/sub_count_nuc.sh $GenomeSz $Reads $OutDir
-	done
-	for Reads in $(ls qc_dna/paired/*/*/*/*_trim.fq.gz); do
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
-		qsub $ProgDir/sub_count_nuc.sh $GenomeSz $Reads
-	done
+for Reads in $(ls qc_dna/minion/*/*/*_trim.fastq.gz); do
+	echo $Reads
+	OutDir=$(dirname $Reads)
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+	qsub $ProgDir/sub_count_nuc.sh $GenomeSz $Reads $OutDir
+done
+for Reads in $(ls qc_dna/paired/*/*/*/*_trim.fq.gz); do
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+	qsub $ProgDir/sub_count_nuc.sh $GenomeSz $Reads
+done
 ```
 
 The results for this are in fusarium_ex_pea and are *_cov.txt files. To look at all the results from coverage estimation script you can search for the last line and display that:
@@ -270,7 +271,7 @@ The results for this are in fusarium_ex_pea and are *_cov.txt files. To look at 
 cd /home/groups/harrisonlab/project_files/fusarium_ex_pea
 grep "equates" *_cov.txt
 ```
-
+```bash 
 illumina
 F81_S3_L001_R1_001_trim_cov.txt: This equates to an estimated genome coverage of 28.59 .
 F81_S3_L001_R2_001_trim_cov.txt: This equates to an estimated genome coverage of 26.83 .
@@ -284,7 +285,7 @@ These were put into: /home/groups/harrisonlab/project_files/fusarium_ex_pea/qc_d
 F81 trimmed minion: This equates to an estimated genome coverage of 43.93
 FOP1 EMR trimmed minion: This equates to an estimated genome coverage of 62.40 
 R2 trimmed minion: This equates to an estimated genome coverage of 47.13
-
+```
 
 
 ## Canu assembly
@@ -334,40 +335,40 @@ R2
 F81
 
 ```bash
-	for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/F81/F81.trimmedReads.fasta.gz); do
-		Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
-		Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
-		Prefix="$Strain"
-		OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
-		qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
-	done
+for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/F81/F81.trimmedReads.fasta.gz); do
+	Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
+	Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
+	Prefix="$Strain"
+	OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
+	qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
+done
 ```
 
 FOP1 EMR
 
 ```bash
-	for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/FOP1-EMR/FOP1-EMR.trimmedReads.fasta.gz); do
-		Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
-		Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
-		Prefix="$Strain"
-		OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
-		qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
-	done
+for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/FOP1-EMR/FOP1-EMR.trimmedReads.fasta.gz); do
+	Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
+	Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
+	Prefix="$Strain"
+	OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
+	qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
+done
 ```
 
 R2  
 
 ```bash
-	for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/R2/R2.trimmedReads.fasta.gz); do
-		Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
-		Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
-		Prefix="$Strain"
-		OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
-		qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
-	done
+for CorrectedReads in $(ls assembly/canu-1.6/F.oxysporum_fsp_pisi/R2/R2.trimmedReads.fasta.gz); do
+	Organism=$(echo $CorrectedReads | rev | cut -f3 -d '/' | rev)
+	Strain=$(echo $CorrectedReads | rev | cut -f2 -d '/' | rev)
+	Prefix="$Strain"
+	OutDir=assembly/SMARTdenovo/$Organism/"$Strain"
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/SMARTdenovo
+	qsub $ProgDir/sub_SMARTdenovo.sh $CorrectedReads $Prefix $OutDir
+done
 ```
 
 
@@ -376,36 +377,36 @@ R2
 
 
 ```bash
-	for Contigs in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg); do
-		AssemblyDir=$(dirname $Contigs)
-		mkdir $AssemblyDir/filtered_contigs
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/abyss
-		$ProgDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/contigs_min_500bp.fasta
-	done
+for Contigs in $(ls assembly/SMARTdenovo/*/*/*.dmo.lay.utg); do
+	AssemblyDir=$(dirname $Contigs)
+	mkdir $AssemblyDir/filtered_contigs
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/abyss
+	$ProgDir/filter_abyss_contigs.py $Contigs 500 > $AssemblyDir/contigs_min_500bp.fasta
+done
 ```
 
 ## Quast (canu) 
 
 ```bash
-	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
-		for Assembly in $(ls assembly/canu-1.6/*/*/*.contigs.fasta); do
-		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
-		OutDir=assembly/canu-1.6/$Organism/$Strain/filtered_contigs
-		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
-	done
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+	for Assembly in $(ls assembly/canu-1.6/*/*/*.contigs.fasta); do
+	Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+	Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+	OutDir=assembly/canu-1.6/$Organism/$Strain/filtered_contigs
+	qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
 ```
 
 ### Quast (SMARTdenovo)
 
 ```bash
-	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
-		for Assembly in $(ls assembly/SMARTdenovo/*/*/contigs_min_500bp.fasta); do
-		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
-		OutDir=$(dirname $Assembly)
-		qsub $ProgDir/sub_quast.sh $Assembly $OutDir
-	done
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+	for Assembly in $(ls assembly/SMARTdenovo/*/*/contigs_min_500bp.fasta); do
+	Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+	Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)  
+	OutDir=$(dirname $Assembly)
+	qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+done
 ```
 
 
@@ -414,21 +415,21 @@ R2
 Didnt actually need to do this as we will only use SMARTdenovo from now on. Only needs ReadsFq1 line and no others, although I actually used all the lines when I ran it and the first qsub line
 
 ```bash
-	for Assembly in $(ls assembly/canu-1.6/*/*/*.contigs.fasta); do
-		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-		echo "$Organism - $Strain"
-		ReadsFq1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n1 | tail -n1)
-		#ReadsFq2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
-		#ReadsAppended=qc_dna/minion/$Organism/$Strain/"$Strain"_reads_appended.fastq.gz
-		cat $ReadsFq1 $ReadsFq2 > $ReadsAppended
-		OutDir=assembly/canu-1.6/$Organism/$Strain/racon
-		Iterations=10
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/racon
-		#qsub $ProgDir/sub_racon.sh $Assembly $ReadsAppended $Iterations $OutDir
-		qsub $ProgDir/sub_racon.sh $Assembly $ReadFq1 $Iterations $OutDir
-	done
-	rm $ReadsAppended
+for Assembly in $(ls assembly/canu-1.6/*/*/*.contigs.fasta); do
+	Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+	Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+	echo "$Organism - $Strain"
+	ReadsFq1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n1 | tail -n1)
+	#ReadsFq2=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz | head -n2 | tail -n1)
+	#ReadsAppended=qc_dna/minion/$Organism/$Strain/"$Strain"_reads_appended.fastq.gz
+	cat $ReadsFq1 $ReadsFq2 > $ReadsAppended
+	OutDir=assembly/canu-1.6/$Organism/$Strain/racon
+	Iterations=10
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/racon
+	#qsub $ProgDir/sub_racon.sh $Assembly $ReadsAppended $Iterations $OutDir
+	qsub $ProgDir/sub_racon.sh $Assembly $ReadFq1 $Iterations $OutDir
+done
+rm $ReadsAppended
 ```
 
 
@@ -436,15 +437,15 @@ Didnt actually need to do this as we will only use SMARTdenovo from now on. Only
 
 
 ```bash
-	for Assembly in $(ls assembly/SMARTdenovo/*/*/contigs_min_500bp.fasta); do
-		Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
-		Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-		ReadsFq1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz)
-		OutDir=$(dirname $Assembly)/racon
-		Iterations=10
-		ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/racon
-		qsub $ProgDir/sub_racon.sh $Assembly $ReadsFq1 $Iterations $OutDir
-	done
+for Assembly in $(ls assembly/SMARTdenovo/*/*/contigs_min_500bp.fasta); do
+	Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev)
+	Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+	ReadsFq1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz)
+	OutDir=$(dirname $Assembly)/racon
+	Iterations=10
+	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/racon
+	qsub $ProgDir/sub_racon.sh $Assembly $ReadsFq1 $Iterations $OutDir
+done
 ```
 
 
@@ -455,28 +456,25 @@ contigs_min_500bp_racon_round_10.fasta
 
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/*/racon/contigs_min_500bp_racon_round_10.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-ReadsFq1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz)
-OutDir=$(dirname $Assembly)/racon_11-15
-Iterations=5
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/racon
-qsub $ProgDir/sub_racon.sh $Assembly $ReadsFq1 $Iterations $OutDir
+  Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+  Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+  ReadsFq1=$(ls qc_dna/minion/$Organism/$Strain/*_trim.fastq.gz)
+  OutDir=$(dirname $Assembly)/racon_11-15
+  Iterations=5
+  ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/racon
+  qsub $ProgDir/sub_racon.sh $Assembly $ReadsFq1 $Iterations $OutDir
 done
 ```
 
 
-
-
-
 ```bash  
-	ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
-		for Assembly in $(ls assembly/SMARTdenovo/*/*/racon/contigs_min_500bp_racon_round_10.fasta); do
-		OutDir=$(dirname $Assembly)
-		echo "" > tmp.txt
-		ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
-		$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/racon_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
-	done
+ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
+	for Assembly in $(ls assembly/SMARTdenovo/*/*/racon/contigs_min_500bp_racon_round_10.fasta); do
+	OutDir=$(dirname $Assembly)
+	echo "" > tmp.txt
+	ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+	$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/racon_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+done
 ```
 
 
@@ -496,28 +494,28 @@ done
 
 ```bash   
 for Assembly in $(ls assembly/SMARTdenovo/*/R2/racon/contigs_min_500bp_racon_round_9.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-echo "$Organism - $Strain"
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/busco
-BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
-OutDir=gene_pred/busco/$Organism/$Strain/assembly
-qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+	Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+	Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+	echo "$Organism - $Strain"
+	ProgDir=/home/jenkis/git_repos/tools/gene_prediction/busco
+	BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+	OutDir=gene_pred/busco/$Organism/$Strain/assembly
+	qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
 done
 ```
 
 for writing to scratch... also run from scratch   20.2.18   Did busco for all rounds on all isolates (stored on /data/scratch)
-
+```bash
 for Assembly in $(ls /home/groups/harrisonlab/project_files/fusarium_ex_pea/assembly/SMARTdenovo/*/R2/racon/contigs_min_500bp_racon_round_9.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-echo "$Organism - $Strain"
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/busco
-BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
-OutDir=R2
-qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   echo "$Organism - $Strain"
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/busco
+   BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+   OutDir=R2
+   qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
 done
-
+```
 
 
 
@@ -538,29 +536,22 @@ tar -zxvf $Tar -C $ScratchDir
 done
 ```
 
-ScratchDir=/data/scratch/nanopore_tmp_data/Fven
-for Tar in $(ls $ScratchDir/F.oxysporum_fsp_pisi_R2_2017-05-17.tar.gz); do
-tar -zxvf $Tar -C $ScratchDir
-done
-
-Needed to update generic profile and seq tools to get these to work.
-
 
 FOP1 EMR
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/FOP1-EMR/racon/racon_min_500bp_renamed.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-echo "$Organism - $Strain"
-ReadsFq1=$(ls raw_dna/minion/*/FOP1-EMR/*.fastq.gz)
-ScratchDir=/data/scratch/nanopore_tmp_data/Fven
-Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_FOP1-EMR_2017-07-11/workspace/pass
-#nanopolish index -d $Fast5Dir1 $ReadsFq1
-OutDir=$(dirname $Assembly)
-mkdir -p $OutDir
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
-#ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
-qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $ReadsFq1 $OutDir/nanopolish
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   echo "$Organism - $Strain"
+   ReadsFq1=$(ls raw_dna/minion/*/FOP1-EMR/*.fastq.gz)
+   ScratchDir=/data/scratch/nanopore_tmp_data/Fven
+   Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_FOP1-EMR_2017-07-11/workspace/pass
+   #nanopolish index -d $Fast5Dir1 $ReadsFq1
+   OutDir=$(dirname $Assembly)
+   mkdir -p $OutDir
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+   #ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+   qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $ReadsFq1 $OutDir/nanopolish
 done
 ```
 
@@ -569,17 +560,17 @@ done
 F81
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/F81/racon/racon_min_500bp_renamed.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-echo "$Organism - $Strain"
-ReadsFq1=$(ls raw_dna/minion/*/F81/*.fastq.gz)
-ScratchDir=/data/scratch/nanopore_tmp_data/Fven
-Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_F81_2017-05-17/workspace/pass
-#nanopolish index -d $Fast5Dir1 $ReadsFq1
-OutDir=$(dirname $Assembly)
-mkdir -p $OutDir
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
-qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $ReadsFq1 $OutDir/nanopolish
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   echo "$Organism - $Strain"
+   ReadsFq1=$(ls raw_dna/minion/*/F81/*.fastq.gz)
+   ScratchDir=/data/scratch/nanopore_tmp_data/Fven
+   Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_F81_2017-05-17/workspace/pass
+   #nanopolish index -d $Fast5Dir1 $ReadsFq1
+   OutDir=$(dirname $Assembly)
+   mkdir -p $OutDir
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+   qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $ReadsFq1 $OutDir/nanopolish
 done
 ```
 
@@ -587,17 +578,17 @@ done
 R2
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/R2/racon/racon_min_500bp_renamed.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-echo "$Organism - $Strain"
-ReadsFq1=$(ls raw_dna/minion/*/R2/*.fastq.gz)
-ScratchDir=/data/scratch/nanopore_tmp_data/Fven
-Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_R2_2017-05-17/workspace/pass
-#nanopolish index -d $Fast5Dir1 $ReadsFq1
-OutDir=$(dirname $Assembly)
-mkdir -p $OutDir
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
-qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $ReadsFq1 $OutDir/nanopolish
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   echo "$Organism - $Strain"
+   ReadsFq1=$(ls raw_dna/minion/*/R2/*.fastq.gz)
+   ScratchDir=/data/scratch/nanopore_tmp_data/Fven
+   Fast5Dir1=$ScratchDir/F.oxysporum_fsp_pisi_R2_2017-05-17/workspace/pass
+   #nanopolish index -d $Fast5Dir1 $ReadsFq1
+   OutDir=$(dirname $Assembly)
+   mkdir -p $OutDir
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+   qsub $ProgDir/sub_bwa_nanopolish.sh $Assembly $ReadsFq1 $OutDir/nanopolish
 done
 ```
 
@@ -609,31 +600,31 @@ done
 #### FOP1-EMR
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/FOP1-EMR/racon/racon_min_500bp_renamed.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-echo "$Organism - $Strain"
-OutDir=$(dirname $Assembly)
-RawReads=$(ls raw_dna/minion/*/FOP1-EMR/*.fastq.gz)
-AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   echo "$Organism - $Strain"
+   OutDir=$(dirname $Assembly)
+   RawReads=$(ls raw_dna/minion/*/FOP1-EMR/*.fastq.gz)
+   AlignedReads=$(ls $OutDir/nanopolish/reads.sorted.bam)
 
-NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
-python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish/nanopolish_range.txt
+   NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+   python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish/nanopolish_range.txt
 
-Ploidy=1
-echo "nanopolish log:" > nanopolish_log.txt
-for Region in $(cat $OutDir/nanopolish/nanopolish_range.txt); do
-Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
-while [ $Jobs -gt 1 ]; do
-sleep 1m
-printf "."
-Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
-done		
-printf "\n"
-echo $Region
-echo $Region >> nanopolish_log.txt
-#ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
-qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+   Ploidy=1
+   echo "nanopolish log:" > nanopolish_log.txt
+   for Region in $(cat $OutDir/nanopolish/nanopolish_range.txt); do
+   Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+   while [ $Jobs -gt 1 ]; do
+   sleep 1m
+   printf "."
+   Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+   done		
+   printf "\n"
+   echo $Region
+   echo $Region >> nanopolish_log.txt
+   #ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+   qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
 done
 done
 ```
@@ -645,55 +636,50 @@ Region=$(head -n1 $OutDir/nanopolish/nanopolish_range.txt)
 
 Some regions didn't run properly so they needed re-running with a different script:
 
+contig_14:200000-250200      job number 8479545
+contig_38:50000-100200                  8479898 
+contig_39:0-50200                       8479905
+contig_45:0-50200                       8479945
+contig_38:50040    reran contig_38:50000-100200 due to being missing jn:8485043
+
+
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/FOP1-EMR/racon/racon_min_500bp_renamed.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-echo "$Organism - $Strain"
-OutDir=$(dirname $Assembly)/nanopolish
-RawReads=$(ls raw_dna/minion/*/FOP1-EMR/*.fastq.gz)
-AlignedReads=$(ls $OutDir/reads.sorted.bam)
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   echo "$Organism - $Strain"
+   OutDir=$(dirname $Assembly)/nanopolish
+   RawReads=$(ls raw_dna/minion/*/FOP1-EMR/*.fastq.gz)
+   AlignedReads=$(ls $OutDir/reads.sorted.bam)
 
-NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+   NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
 
-Ploidy=1
-echo "nanopolish log:" > $OutDir/nanopolish_log.txt
-for Region in $(cat $OutDir/nanopolish_range.txt | grep -e 'contig_14:200000-250200' -e 'contig_38:50000-100200' -e 'contig_39:0-50200' -e 'contig_45:0-50200'); do
-echo $Region
-echo $Region >> $OutDir/nanopolish_log.txt
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
-qsub $ProgDir/sub_nanopolish_variants_high_mem.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+   Ploidy=1
+   echo "nanopolish log:" > $OutDir/nanopolish_log.txt
+   for Region in $(cat $OutDir/nanopolish_range.txt | grep -e 'contig_14:200000-250200' -e 'contig_38:50000-100200' -e 'contig_39:0-50200' -e 'contig_45:0-50200'); do
+   echo $Region
+   echo $Region >> $OutDir/nanopolish_log.txt
+   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+   qsub $ProgDir/sub_nanopolish_variants_high_mem.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
 done
 done
 ```
 
 
-FILES THAT NEEDED Re-submitting with sub_nanopolish_variants_high_mem.sh
-contig_14:200000-250200      job number 8479545
-
-contig_38:50000-100200                  8479898 
-
-contig_39:0-50200                       8479905
-
-contig_45:0-50200                       8479945
-
-contig_38:50040    reran contig_38:50000-100200 due to being missing jn:8485043
-
-
 
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/FOP1-EMR/racon/racon_min_500bp_renamed.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
-# cat "" > $OutDir/"$Strain"_nanopolish.fa
-InDir=$(dirname $Assembly)/nanopolish
-NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
-python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanopolish.fa
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
+   # cat "" > $OutDir/"$Strain"_nanopolish.fa
+   InDir=$(dirname $Assembly)/nanopolish
+   NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+   python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanopolish.fa
 
-echo "" > tmp.txt
-ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
-$ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanopolish.fa --out $OutDir/"$Strain"_nanopolish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+   echo "" > tmp.txt
+   ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+   $ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanopolish.fa --out $OutDir/"$Strain"_nanopolish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
 done
 ```
 
@@ -705,51 +691,50 @@ done
 #### F81
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/F81/racon/racon_min_500bp_renamed.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-echo "$Organism - $Strain"
-OutDir=$(dirname $Assembly)/nanopolish
-RawReads=$(ls raw_dna/minion/*/F81/*.fastq.gz)
-AlignedReads=$(ls $OutDir/reads.sorted.bam)
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   echo "$Organism - $Strain"
+   OutDir=$(dirname $Assembly)/nanopolish
+   RawReads=$(ls raw_dna/minion/*/F81/*.fastq.gz)
+   AlignedReads=$(ls $OutDir/reads.sorted.bam)
 
-NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
-python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish_range.txt
+   NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+   python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish_range.txt
 
-Ploidy=1
-echo "nanopolish log:" > nanopolish_log.txt
-for Region in $(cat $OutDir/nanopolish_range.txt); do
-Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
-while [ $Jobs -gt 1 ]; do
-sleep 1m
-printf "."
-Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
-done		
-printf "\n"
-echo $Region
-echo $Region >> nanopolish_log.txt
-#ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
-qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+   Ploidy=1
+   echo "nanopolish log:" > nanopolish_log.txt
+   for Region in $(cat $OutDir/nanopolish_range.txt); do
+   Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+   while [ $Jobs -gt 1 ]; do
+   sleep 1m
+   printf "."
+   Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+   done		
+   printf "\n"
+   echo $Region
+   echo $Region >> nanopolish_log.txt
+   #ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+   qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
 done
 done
 ```
-still running: contig_65:0-50200
 
 
 
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/F81/racon/racon_min_500bp_renamed.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
-# cat "" > $OutDir/"$Strain"_nanopolish.fa
-InDir=$(dirname $Assembly)/nanopolish
-NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
-python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanopolish.fa
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
+   # cat "" > $OutDir/"$Strain"_nanopolish.fa
+   InDir=$(dirname $Assembly)/nanopolish
+   NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+   python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanopolish.fa
 
-echo "" > tmp.txt
-ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
-$ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanopolish.fa --out $OutDir/"$Strain"_nanopolish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+   echo "" > tmp.txt
+   ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+   $ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanopolish.fa --out $OutDir/"$Strain"_nanopolish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
 done
 ```
 
@@ -758,31 +743,31 @@ done
 #### R2
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/R2/racon/racon_min_500bp_renamed.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-echo "$Organism - $Strain"
-OutDir=$(dirname $Assembly)/nanopolish
-RawReads=$(ls raw_dna/minion/*/R2/*.fastq.gz)
-AlignedReads=$(ls $OutDir/reads.sorted.bam)
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   echo "$Organism - $Strain"
+   OutDir=$(dirname $Assembly)/nanopolish
+   RawReads=$(ls raw_dna/minion/*/R2/*.fastq.gz)
+   AlignedReads=$(ls $OutDir/reads.sorted.bam)
 
-NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
-python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish_range.txt
+   NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+   python $NanoPolishDir/nanopolish_makerange.py $Assembly > $OutDir/nanopolish_range.txt
 
-Ploidy=1
-echo "nanopolish log:" > nanopolish_log.txt
-for Region in $(cat $OutDir/nanopolish_range.txt); do
-Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
-while [ $Jobs -gt 1 ]; do
-sleep 30s
-printf "."
-Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
-done		
-printf "\n"
-echo $Region
-echo $Region >> nanopolish_log.txt
-#ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
-qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
+   Ploidy=1
+   echo "nanopolish log:" > nanopolish_log.txt
+   for Region in $(cat $OutDir/nanopolish_range.txt); do
+   Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+   while [ $Jobs -gt 1 ]; do
+   sleep 30s
+   printf "."
+   Jobs=$(qstat | grep 'sub_nanopo' | grep 'qw' | wc -l)
+   done		
+   printf "\n"
+   echo $Region
+   echo $Region >> nanopolish_log.txt
+   #ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/nanopolish
+   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/assemblers/nanopolish
+   qsub $ProgDir/sub_nanopolish_variants.sh $Assembly $RawReads $AlignedReads $Ploidy $Region $OutDir/$Region
 done
 done
 ```
@@ -790,17 +775,17 @@ done
 
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/R2/racon/racon_min_500bp_renamed.fasta); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
-# cat "" > $OutDir/"$Strain"_nanopolish.fa
-InDir=$(dirname $Assembly)/nanopolish
-NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
-python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanopolish.fa
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   OutDir=assembly/SMARTdenovo/$Organism/$Strain/nanopolish
+   # cat "" > $OutDir/"$Strain"_nanopolish.fa
+   InDir=$(dirname $Assembly)/nanopolish
+   NanoPolishDir=/home/armita/prog/nanopolish/nanopolish/scripts
+   python $NanoPolishDir/nanopolish_merge.py $InDir/*:*-*/*.fa > $OutDir/"$Strain"_nanopolish.fa
 
-echo "" > tmp.txt
-ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
-$ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanopolish.fa --out $OutDir/"$Strain"_nanopolish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+   echo "" > tmp.txt
+   ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+   $ProgDir/remove_contaminants.py --keep_mitochondria --inp $OutDir/"$Strain"_nanopolish.fa --out $OutDir/"$Strain"_nanopolish_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
 done
 ```
 
@@ -832,39 +817,39 @@ done
 
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/FOP1-EMR/nanopolish/*_nanopolish_min_500bp_renamed.fasta); do
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
-echo $Strain
-echo $Organism
-TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz);
-TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz);
-echo $TrimF1_Read
-echo $TrimR1_Read
-OutDir=$(dirname $Assembly)
-Iterations=10
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
-qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
-done
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
+   echo $Strain
+   echo $Organism
+   TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz);
+   TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz);
+   echo $TrimF1_Read
+   echo $TrimR1_Read
+   OutDir=$(dirname $Assembly)
+   Iterations=10
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+   qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
+   done
 ```
 
 #### F81
 
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/F81/nanopolish/*_nanopolish_min_500bp_renamed.fasta); do
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
-echo $Strain
-echo $Organism
-TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz);
-TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz);
-echo $TrimF1_Read
-echo $TrimR1_Read
-OutDir=$(dirname $Assembly)
-Iterations=10
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
-qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
+   echo $Strain
+   echo $Organism
+   TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz);
+   TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz);
+   echo $TrimF1_Read
+   echo $TrimR1_Read
+   OutDir=$(dirname $Assembly)
+   Iterations=10
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+   qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
 done
 ```
 
@@ -873,19 +858,19 @@ done
 
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/R2/nanopolish/*_nanopolish_min_500bp_renamed.fasta); do
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
-echo $Strain
-echo $Organism
-TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz);
-TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz);
-echo $TrimF1_Read
-echo $TrimR1_Read
-OutDir=$(dirname $Assembly)
-Iterations=10
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
-qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   IlluminaDir=$(ls -d qc_dna/paired/$Organism/$Strain)
+   echo $Strain
+   echo $Organism
+   TrimF1_Read=$(ls $IlluminaDir/F/*_trim.fq.gz);
+   TrimR1_Read=$(ls $IlluminaDir/R/*_trim.fq.gz);
+   echo $TrimF1_Read
+   echo $TrimR1_Read
+   OutDir=$(dirname $Assembly)
+   Iterations=10
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/pilon
+   qsub $ProgDir/sub_pilon.sh $Assembly $TrimF1_Read $TrimR1_Read $OutDir $Iterations
 done
 ```
 
@@ -894,12 +879,12 @@ done
 
 ```bash
 ProgDir=/home/jenkis/git_repos/tools/seq_tools/assemblers/assembly_qc/quast
-for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/pilon_*.fasta | grep 'pilon_10'); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
-echo "$Organism - $Strain"
-OutDir=$(dirname $Assembly)
-qsub $ProgDir/sub_quast.sh $Assembly $OutDir
+   for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/pilon_*.fasta | grep 'pilon_10'); do
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)  
+   echo "$Organism - $Strain"
+   OutDir=$(dirname $Assembly)
+   qsub $ProgDir/sub_quast.sh $Assembly $OutDir
 done
 ```
 
@@ -921,35 +906,36 @@ done
 ### remove contaminants from pilon_10
 ```bash
 for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/pilon_*.fasta | grep 'pilon_10'); do
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-OutDir=$(dirname $Assembly)
-echo "" > tmp.txt
-ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
-$ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/"$Strain"_pilon_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   OutDir=$(dirname $Assembly)
+   echo "" > tmp.txt
+   ProgDir=~/git_repos/tools/seq_tools/assemblers/assembly_qc/remove_contaminants
+   $ProgDir/remove_contaminants.py --keep_mitochondria --inp $Assembly --out $OutDir/"$Strain"_pilon_min_500bp_renamed.fasta --coord_file tmp.txt > $OutDir/log.txt
 done
 ```
 
 
 ## Repeatmasking
 
-Repeat masking was performed and used the following programs: Repeatmasker Repeatmodeler
+#### Repeat masking was performed and used the following programs: Repeatmasker Repeatmodeler
 
 
 ```bash
 ProgDir=/home/jenkis/git_repos/tools/seq_tools/repeat_masking
 for Assembly in $(ls assembly/SMARTdenovo/*/*/nanopolish/*pilon_min_500bp_renamed.fasta); do
-Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
-Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev | cut -f1 -d '_')
-echo "$Organism - $Strain"
-#OutDir=repeat_masked/$Organism/"$Strain"_minion/minion_submission
-OutDir=repeat_masked/$Organism/"$Strain"_minion/minion_submission_repeat
-qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
-qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
+   Organism=$(echo $Assembly | rev | cut -f4 -d '/' | rev)
+   Strain=$(echo $Assembly | rev | cut -f3 -d '/' | rev | cut -f1 -d '_')
+   echo "$Organism - $Strain"
+   #OutDir=repeat_masked/$Organism/"$Strain"_minion/minion_submission
+   OutDir=repeat_masked/$Organism/"$Strain"_minion/minion_submission_repeat
+   qsub $ProgDir/rep_modeling.sh $Assembly $OutDir
+   qsub $ProgDir/transposonPSI.sh $Assembly $OutDir
 done
 ```
 
-repeat 
+repeated repeat-masking as softmasked file went missing
+```bash
 F.oxysporum_fsp_pisi - F81
 Your job 8567621 ("rep_modeling.sh") has been submitted
 Your job 8567622 ("transposonPSI.sh") has been submitted
@@ -959,66 +945,64 @@ Your job 8567624 ("transposonPSI.sh") has been submitted
 F.oxysporum_fsp_pisi - R2
 Your job 8567625 ("rep_modeling.sh") has been submitted
 Your job 8567626 ("transposonPSI.sh") has been submitted
+```
 
 
 
-
-The TransposonPSI masked bases were used to mask additional bases from the repeatmasker / repeatmodeller softmasked and hardmasked files.
+#### The TransposonPSI masked bases were used to mask additional bases from the repeatmasker / repeatmodeller softmasked and hardmasked files.
 
 ```bash
 for File in $(ls repeat_masked/*/*_minion/minion_submission/*_contigs_softmasked.fa); do
-OutDir=$(dirname $File)
-TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
-OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
-echo "$OutFile"
-bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
-echo "Number of masked bases:"
-cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
+   OutDir=$(dirname $File)
+   TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+   OutFile=$(echo $File | sed 's/_contigs_softmasked.fa/_contigs_softmasked_repeatmasker_TPSI_appended.fa/g')
+   echo "$OutFile"
+   bedtools maskfasta -soft -fi $File -bed $TPSI -fo $OutFile
+   echo "Number of masked bases:"
+   cat $OutFile | grep -v '>' | tr -d '\n' | awk '{print $0, gsub("[a-z]", ".")}' | cut -f2 -d ' '
 done
 ```
+```bash
 repeat_masked/F.oxysporum_fsp_pisi/F81_minion/minion_submission/F81_contigs_softmasked_repeatmasker_TPSI_appended.fa
-Number of masked bases:
-8365149
+Number of masked bases: 8365149
 repeat_masked/F.oxysporum_fsp_pisi/FOP1-EMR_minion/minion_submission/FOP1-EMR_contigs_softmasked_repeatmasker_TPSI_appended.fa
-Number of masked bases:
-15957668
+Number of masked bases: 15957668
 repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa
-Number of masked bases:
-6139936
-
+Number of masked bases: 6139936
+```
 
 ```bash
 # The number of N's in hardmasked sequence are not counted as some may be present within the assembly and were therefore not repeatmasked.
-for File in $(ls repeat_masked/*/*_minion/minion_submission/*_contigs_softmasked.fa); do
-OutDir=$(dirname $File)
-TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
-OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
-echo "$OutFile"
-bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
+   for File in $(ls repeat_masked/*/*_minion/minion_submission/*_contigs_softmasked.fa); do
+   OutDir=$(dirname $File)
+   TPSI=$(ls $OutDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+   OutFile=$(echo $File | sed 's/_contigs_hardmasked.fa/_contigs_hardmasked_repeatmasker_TPSI_appended.fa/g')
+   echo "$OutFile"
+   bedtools maskfasta -fi $File -bed $TPSI -fo $OutFile
 done
 ```
 
 ```bash
 for RepDir in $(ls -d repeat_masked/*/*/minion_submission); do
-Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
-Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
-RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
-TransPSIGff=$(ls $RepDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
-# printf "The number of bases masked by RepeatMasker:\t"   (1)
-RepMaskerBp=$(sortBed -i $RepMaskGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}')
-# printf "The number of bases masked by TransposonPSI:\t"   (2)
-TpsiBp=$(sortBed -i $TransPSIGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}')
-# printf "The total number of masked bases are:\t"    (3)
-Total=$(cat $RepMaskGff $TransPSIGff | sortBed | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}')
-printf "$Organism\t$Strain\t$RepMaskerBp\t$TpsiBp\t$Total\n"
+   Strain=$(echo $RepDir | rev | cut -f2 -d '/' | rev)
+   Organism=$(echo $RepDir | rev | cut -f3 -d '/' | rev)  
+   RepMaskGff=$(ls $RepDir/*_contigs_hardmasked.gff)
+   TransPSIGff=$(ls $RepDir/*_contigs_unmasked.fa.TPSI.allHits.chains.gff3)
+   # printf "The number of bases masked by RepeatMasker:\t"   (1)
+   RepMaskerBp=$(sortBed -i $RepMaskGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}')
+   # printf "The number of bases masked by TransposonPSI:\t"   (2)
+   TpsiBp=$(sortBed -i $TransPSIGff | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}')
+   # printf "The total number of masked bases are:\t"    (3)
+   Total=$(cat $RepMaskGff $TransPSIGff | sortBed | bedtools merge | awk -F'\t' 'BEGIN{SUM=0}{ SUM+=$3-$2 }END{print SUM}')
+   printf "$Organism\t$Strain\t$RepMaskerBp\t$TpsiBp\t$Total\n"
 done
 ```
-
+```bash
                                                  (1)       (2)        (3)
 F.oxysporum_fsp_pisi	F81_minion	           7995945	 3124871	8365149
 F.oxysporum_fsp_pisi	FOP1-EMR_minion	      15588012	 6311810	15957668
 F.oxysporum_fsp_pisi	R2_minion	           5751282	 2309548	6139936
-
+```
 
 
 # Gene prediction of Minion genomes
@@ -1046,21 +1030,21 @@ done
 
 ```bash    
 for FilePath in $(ls -d raw_rna/paired/F.oxysporum_fsp_pisi/*); do
-Jobs=$(qstat | grep 'rna_qc_' | wc -l)
-while [ $Jobs -gt 4 ]; do
-sleep 1m
-printf "."
-Jobs=$(qstat | grep 'rna_qc_' | wc -l)
-done
-FileNum=$(ls $FilePath/F/*.gz | wc -l)
-for num in $(seq 1 $FileNum); do
-FileF=$(ls $FilePath/F/*.gz | head -n $num | tail -n1)
-FileR=$(ls $FilePath/R/*.gz | head -n $num | tail -n1)
-echo $FileF
-echo $FileR
-IlluminaAdapters=/home/jenkis/git_repos/tools/seq_tools/ncbi_adapters.fa
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/rna_qc
-qsub $ProgDir/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
+   Jobs=$(qstat | grep 'rna_qc_' | wc -l)
+   while [ $Jobs -gt 4 ]; do
+   sleep 1m
+   printf "."
+   Jobs=$(qstat | grep 'rna_qc_' | wc -l)
+   done
+   FileNum=$(ls $FilePath/F/*.gz | wc -l)
+   for num in $(seq 1 $FileNum); do
+   FileF=$(ls $FilePath/F/*.gz | head -n $num | tail -n1)
+   FileR=$(ls $FilePath/R/*.gz | head -n $num | tail -n1)
+   echo $FileF
+   echo $FileR
+   IlluminaAdapters=/home/jenkis/git_repos/tools/seq_tools/ncbi_adapters.fa
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/rna_qc
+   qsub $ProgDir/rna_qc_fastq-mcf.sh $FileF $FileR $IlluminaAdapters RNA
 done
 done
 ```  
@@ -1076,9 +1060,9 @@ cat WTCHG_455357_002_1.fastq.gz | gunzip -cf | head -n10
 ### Ran fastqc on trimmed RNAseq data (output from rna_qc_fastq-mcf.sh)
 ```bash
 for RawData in qc_rna/paired/F.oxysporum_fsp_pisi/*/*/*.fq.gz; do
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
-echo $RawData;
-qsub $ProgDir/run_fastqc.sh $RawData
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/dna_qc
+   echo $RawData;
+   qsub $ProgDir/run_fastqc.sh $RawData
 done
 ```
 FIND HERE: ls qc_rna/paired/F.oxysporum_fsp_pisi/96hrsFOP1EMRS/R/
@@ -1094,22 +1078,22 @@ Aligning RNAseq data to one file from the pea transcriptome (there were 6 files 
 ```bash
 for Assembly in $(ls ../../../../../home/jenkis/popgen/rnaseq/pea_transcriptome.fa); do
 #for Assembly in $(ls ../../../../../home/jenkis/popgen/rnaseq/GCMM01.1.fsa_nt); do
-echo "$Assembly"
-for RNADir in $(ls -d qc_rna/paired/*/*); do
-#for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_pisi/96hrsFOP1EMRS); do
-FileNum=$(ls $RNADir/F/*.fq.gz | wc -l)
-for num in $(seq 1 $FileNum); do
-printf "\n"
-FileF=$(ls $RNADir/F/*.fq.gz | head -n $num | tail -n1)
-FileR=$(ls $RNADir/R/*.fq.gz | head -n $num | tail -n1)
-echo $FileF
-echo $FileR
-Prefix=$(echo $FileF | rev | cut -f1 -d '/' | rev | sed "s/_1_trim.fq.gz//g")
-#Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
-#echo "$Timepoint"
-OutDir=alignment/star/pea_transcriptome/v1.1/$Prefix
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
-qsub $ProgDir/sub_star_unmapped.sh $Assembly $FileF $FileR $OutDir
+   echo "$Assembly"
+   for RNADir in $(ls -d qc_rna/paired/*/*); do
+   #for RNADir in $(ls -d qc_rna/paired/F.oxysporum_fsp_pisi/96hrsFOP1EMRS); do
+   FileNum=$(ls $RNADir/F/*.fq.gz | wc -l)
+   for num in $(seq 1 $FileNum); do
+   printf "\n"
+   FileF=$(ls $RNADir/F/*.fq.gz | head -n $num | tail -n1)
+   FileR=$(ls $RNADir/R/*.fq.gz | head -n $num | tail -n1)
+   echo $FileF
+   echo $FileR
+   Prefix=$(echo $FileF | rev | cut -f1 -d '/' | rev | sed "s/_1_trim.fq.gz//g")
+   #Timepoint=$(echo $RNADir | rev | cut -f1 -d '/' | rev)
+   #echo "$Timepoint"
+   OutDir=alignment/star/pea_transcriptome/v1.1/$Prefix
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
+   qsub $ProgDir/sub_star_unmapped.sh $Assembly $FileF $FileR $OutDir
 done
 done
 done
@@ -1124,8 +1108,8 @@ done > filename.txt
 ### gzip files:
 ```bash
 for File in $(ls -d alignment/star/pea_transcriptome/v1.1/*/*.mate*); do
-echo $File
-cat $File | gzip -cf > $File.fq.gz
+   echo $File
+   cat $File | gzip -cf > $File.fq.gz
 done
 ```
 
@@ -1238,99 +1222,97 @@ samtools merge -f $OutDir/concatenated.bam $BamFiles
 
 # Braker gene prediction
 
-FOP1 EMR     8504794 (didnt work)    8504801 (2nd attempt- error due to file existing)    8504803 (3rd attempt- didnt work )   8505652 (4th attempt)    8505660 (5th attempt)   8505661 (6th attempt)
+FOP1 EMR     
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/FOP1-EMR_minion/minion_submission/FOP1-EMR_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-AcceptedHits=$(ls alignment/star/$Organism/FOP1-EMR/concatenated/concatenated.bam)
-OutDir=gene_pred/braker/$Organism/"$Strain"_braker
-GeneModelName="$Organism"_"$Strain"_braker
-rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
-qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   AcceptedHits=$(ls alignment/star/$Organism/FOP1-EMR/concatenated/concatenated.bam)
+   OutDir=gene_pred/braker/$Organism/"$Strain"_braker
+   GeneModelName="$Organism"_"$Strain"_braker
+   rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
+   qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 done
 ```
 
 
-8505619 Andrew had to run these as i couldnt get it working 
+Andrew had to run these as I couldn't get it working jn=8505619 
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/FOP1-EMR_minion/minion_submission/FOP1-EMR_contigs_softmasked_repeatmasker_TPSI_appended.fa); do 
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-AcceptedHits=$(ls alignment/star/$Organism/FOP1-EMR/concatenated/concatenated.bam)
-OutDir=../../../../../data/scratch/armita/idris/fusarium_ex_pea/gene_pred/braker/$Organism/"$Strain"_braker
-GeneModelName="$Organism"_"$Strain"_braker_ADA
-rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName 
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
-qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   AcceptedHits=$(ls alignment/star/$Organism/FOP1-EMR/concatenated/concatenated.bam)
+   OutDir=../../../../../data/scratch/armita/idris/fusarium_ex_pea/gene_pred/braker/$Organism/"$Strain"_braker
+   GeneModelName="$Organism"_"$Strain"_braker_ADA
+   rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName 
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
+   qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 done
 ```
 
 
 
-F81     8504795
+F81  
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/F81_minion/minion_submission/F81_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-AcceptedHits=$(ls alignment/star/$Organism/F81/concatenated/concatenated.bam)
-OutDir=gene_pred/braker/$Organism/"$Strain"_braker
-GeneModelName="$Organism"_"$Strain"_braker
-rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
-qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   AcceptedHits=$(ls alignment/star/$Organism/F81/concatenated/concatenated.bam)
+   OutDir=gene_pred/braker/$Organism/"$Strain"_braker
+   GeneModelName="$Organism"_"$Strain"_braker
+   rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
+   qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 done
 ```
 
-Andrew script and job number: 
+Andrew script and job number: 8505708
 ```
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/F81_minion/minion_submission/F81_contigs_softmasked_repeatmasker_TPSI_appended.fa); do 
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-AcceptedHits=$(ls alignment/star/$Organism/F81/concatenated/concatenated.bam)
-OutDir=../../../../../data/scratch/armita/idris/fusarium_ex_pea/gene_pred/braker/$Organism/"$Strain"_braker
-GeneModelName="$Organism"_"$Strain"_braker_ADA
-rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName 
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
-qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   AcceptedHits=$(ls alignment/star/$Organism/F81/concatenated/concatenated.bam)
+   OutDir=../../../../../data/scratch/armita/idris/fusarium_ex_pea/gene_pred/braker/$Organism/"$Strain"_braker
+   GeneModelName="$Organism"_"$Strain"_braker_ADA
+   rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName 
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
+   qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 done
 ```
 
-8505708    8505709   one is F81 and one is R2 (both andrews versions)
-
-R2    8504796
+R2 
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-AcceptedHits=$(ls alignment/star/$Organism/R2/concatenated/concatenated.bam)
-OutDir=gene_pred/braker/$Organism/"$Strain"_braker
-GeneModelName="$Organism"_"$Strain"_braker
-rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
-qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   AcceptedHits=$(ls alignment/star/$Organism/R2/concatenated/concatenated.bam)
+   OutDir=gene_pred/braker/$Organism/"$Strain"_braker
+   GeneModelName="$Organism"_"$Strain"_braker
+   rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
+   qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 done
 ```
 
 
-Andrew script and job number: 
+Andrew script and job number:  8505709
 ```
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa); do 
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-AcceptedHits=$(ls alignment/star/$Organism/R2/concatenated/concatenated.bam)
-OutDir=../../../../../data/scratch/armita/idris/fusarium_ex_pea/gene_pred/braker/$Organism/"$Strain"_braker
-GeneModelName="$Organism"_"$Strain"_braker_ADA
-rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName 
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
-qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   AcceptedHits=$(ls alignment/star/$Organism/R2/concatenated/concatenated.bam)
+   OutDir=../../../../../data/scratch/armita/idris/fusarium_ex_pea/gene_pred/braker/$Organism/"$Strain"_braker
+   GeneModelName="$Organism"_"$Strain"_braker_ADA
+   rm -r /home/armita/prog/augustus-3.1/config/species/$GeneModelName 
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/braker1
+   qsub $ProgDir/sub_braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
 done
 ```
 
@@ -1352,42 +1334,42 @@ Note - cufflinks doesn't always predict direction of a transcript and therefore 
 FOP1 EMR     jn=8505783
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/FOP1-EMR_minion/minion_submission/FOP1-EMR_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
-mkdir -p $OutDir
-AcceptedHits=$(ls alignment/star/F.oxysporum_fsp_pisi/FOP1-EMR/concatenated/concatenated.bam)
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
-qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
+   mkdir -p $OutDir
+   AcceptedHits=$(ls alignment/star/F.oxysporum_fsp_pisi/FOP1-EMR/concatenated/concatenated.bam)
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
+   qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
 done
 ```
 
 F81      jn=8505784
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/F81_minion/minion_submission/F81_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
-mkdir -p $OutDir
-AcceptedHits=$(ls alignment/star/F.oxysporum_fsp_pisi/F81/concatenated/concatenated.bam)
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
-qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
+   mkdir -p $OutDir
+   AcceptedHits=$(ls alignment/star/F.oxysporum_fsp_pisi/F81/concatenated/concatenated.bam)
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
+   qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
 done
 ```
 
 R2     jn=8505785
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
-mkdir -p $OutDir
-AcceptedHits=$(ls alignment/star/F.oxysporum_fsp_pisi/R2/concatenated/concatenated.bam)
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
-qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated
+   mkdir -p $OutDir
+   AcceptedHits=$(ls alignment/star/F.oxysporum_fsp_pisi/R2/concatenated/concatenated.bam)
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/RNAseq
+   qsub $ProgDir/sub_cufflinks.sh $AcceptedHits $OutDir
 done
 ```
 
@@ -1398,13 +1380,13 @@ done
 FOP1-EMR    jn=8506672
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/FOP1-EMR_minion/minion_submission/FOP1-EMR_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-OutDir=gene_pred/codingquary/$Organism/$Strain
-CufflinksGTF=gene_pred/cufflinks/$Organism/$Strain/concatenated/transcripts.gtf
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
-qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   OutDir=gene_pred/codingquary/$Organism/$Strain
+   CufflinksGTF=gene_pred/cufflinks/$Organism/$Strain/concatenated/transcripts.gtf
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
+   qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
 done
 ```
 
@@ -1412,13 +1394,13 @@ done
 F81    jn=8506764
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/F81_minion/minion_submission/F81_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-OutDir=gene_pred/codingquary/$Organism/$Strain
-CufflinksGTF=gene_pred/cufflinks/$Organism/$Strain/concatenated/transcripts.gtf
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
-qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   OutDir=gene_pred/codingquary/$Organism/$Strain
+   CufflinksGTF=gene_pred/cufflinks/$Organism/$Strain/concatenated/transcripts.gtf
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
+   qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
 done
 ```
 
@@ -1426,13 +1408,13 @@ done
 R2     jn=8506783
 ```bash
 for Assembly in $(ls repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-OutDir=gene_pred/codingquary/$Organism/$Strain
-CufflinksGTF=gene_pred/cufflinks/$Organism/$Strain/concatenated/transcripts.gtf
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
-qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   OutDir=gene_pred/codingquary/$Organism/$Strain
+   CufflinksGTF=gene_pred/cufflinks/$Organism/$Strain/concatenated/transcripts.gtf
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
+   qsub $ProgDir/sub_CodingQuary.sh $Assembly $CufflinksGTF $OutDir
 done
 ```
 
@@ -1440,41 +1422,41 @@ done
 Done for each genome FOP1 EMR, F81 and R2
 ```bash
 for BrakerGff in $(ls gene_pred/braker/F.oxysporum_fsp_pisi/R2_minion_braker_ADA/F.oxysporum_fsp_pisi_R2_minion_braker_ADA/augustus.gff3); do
-Strain=$(echo $BrakerGff | rev | cut -d '/' -f3 | rev | sed 's/_braker_ADA//g')
-Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-Assembly=$(ls repeat_masked/$Organism/$Strain/*/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa)   
-CodingQuaryGff=gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3
-PGNGff=gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3
-AddDir=gene_pred/codingquary/$Organism/$Strain/additional
-FinalDir=gene_pred/final/$Organism/$Strain/final
-AddGenesList=$AddDir/additional_genes.txt
-AddGenesGff=$AddDir/additional_genes.gff
-FinalGff=$AddDir/combined_genes.gff
-mkdir -p $AddDir
-mkdir -p $FinalDir
+   Strain=$(echo $BrakerGff | rev | cut -d '/' -f3 | rev | sed 's/_braker_ADA//g')
+   Organism=$(echo $BrakerGff | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   Assembly=$(ls repeat_masked/$Organism/$Strain/*/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa)   
+   CodingQuaryGff=gene_pred/codingquary/$Organism/$Strain/out/PredictedPass.gff3
+   PGNGff=gene_pred/codingquary/$Organism/$Strain/out/PGN_predictedPass.gff3
+   AddDir=gene_pred/codingquary/$Organism/$Strain/additional
+   FinalDir=gene_pred/final/$Organism/$Strain/final
+   AddGenesList=$AddDir/additional_genes.txt
+   AddGenesGff=$AddDir/additional_genes.gff
+   FinalGff=$AddDir/combined_genes.gff
+   mkdir -p $AddDir
+   mkdir -p $FinalDir
 
-bedtools intersect -v -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
-bedtools intersect -v -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation
-$ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
-$ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
-$ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $FinalDir/final_genes_CodingQuary.gff3
-$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_CodingQuary.gff3 $FinalDir/final_genes_CodingQuary
-cp $BrakerGff $FinalDir/final_genes_Braker.gff3
-$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
-cat $FinalDir/final_genes_Braker.pep.fasta $FinalDir/final_genes_CodingQuary.pep.fasta | sed -r 's/\*/X/g' > $FinalDir/final_genes_combined.pep.fasta
-cat $FinalDir/final_genes_Braker.cdna.fasta $FinalDir/final_genes_CodingQuary.cdna.fasta > $FinalDir/final_genes_combined.cdna.fasta
-cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
-cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
+   bedtools intersect -v -a $CodingQuaryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
+   bedtools intersect -v -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation
+   $ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuaryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
+   $ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
+   $ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $FinalDir/final_genes_CodingQuary.gff3
+   $ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_CodingQuary.gff3 $FinalDir/final_genes_CodingQuary
+   cp $BrakerGff $FinalDir/final_genes_Braker.gff3
+   $ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
+   cat $FinalDir/final_genes_Braker.pep.fasta $FinalDir/final_genes_CodingQuary.pep.fasta | sed -r 's/\*/X/g' > $FinalDir/final_genes_combined.pep.fasta
+   cat $FinalDir/final_genes_Braker.cdna.fasta $FinalDir/final_genes_CodingQuary.cdna.fasta > $FinalDir/final_genes_combined.cdna.fasta
+   cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
+   cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
 
-GffBraker=$FinalDir/final_genes_CodingQuary.gff3
-GffQuary=$FinalDir/final_genes_Braker.gff3
-GffAppended=$FinalDir/final_genes_appended.gff3
-cat $GffBraker $GffQuary > $GffAppended
+   GffBraker=$FinalDir/final_genes_CodingQuary.gff3
+   GffQuary=$FinalDir/final_genes_Braker.gff3
+   GffAppended=$FinalDir/final_genes_appended.gff3
+   cat $GffBraker $GffQuary > $GffAppended
 
-# cat $BrakerGff $AddDir/additional_gene_parsed.gff3 | bedtools sort > $FinalGff
+   # cat $BrakerGff $AddDir/additional_gene_parsed.gff3 | bedtools sort > $FinalGff
 done
 ```
 
@@ -1486,14 +1468,14 @@ Testa AC, Hane JK, Ellwood SR, Oliver RP. CodingQuarry: highly accurate hidden M
 # The final number of genes per isolate was observed using:
 
 ```bash
-for DirPath in $(ls -d gene_pred/final/*/*/final); do
-Strain=$(echo $DirPath| rev | cut -d '/' -f2 | rev)
-Organism=$(echo $DirPath | rev | cut -d '/' -f3 | rev)
-echo "$Organism - $Strain"
-cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
-cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
-cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
-echo "";
+   for DirPath in $(ls -d gene_pred/final/*/*/final); do
+   Strain=$(echo $DirPath| rev | cut -d '/' -f2 | rev)
+   Organism=$(echo $DirPath | rev | cut -d '/' -f3 | rev)
+   echo "$Organism - $Strain"
+   cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
+   cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
+   cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
+   echo "";
 done
 ```
 ```bash  
@@ -1520,22 +1502,22 @@ F.oxysporum_fsp_pisi - R2_minion
 
 ```bash
 for GffAppended in $(ls gene_pred/final/*/R2_minion/final/final_genes_appended.gff3); do
-Strain=$(echo $GffAppended | rev | cut -d '/' -f3 | rev)
-Organism=$(echo $GffAppended | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-FinalDir=gene_pred/final/$Organism/$Strain/final
-GffFiltered=$FinalDir/filtered_duplicates.gff
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
-$ProgDir/remove_dup_features.py --inp_gff $GffAppended --out_gff $GffFiltered
-GffRenamed=$FinalDir/final_genes_appended_renamed.gff3
-LogFile=$FinalDir/final_genes_appended_renamed.log
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
-$ProgDir/gff_rename_genes.py --inp_gff $GffFiltered --conversion_log $LogFile > $GffRenamed
-rm $GffFiltered
-Assembly=$(ls repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa)
-$ProgDir/gff2fasta.pl $Assembly $GffRenamed gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed
-# The proteins fasta file contains * instead of Xs for stop codons, these should be changed
-sed -i 's/\*/X/g' gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.pep.fasta
+   Strain=$(echo $GffAppended | rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $GffAppended | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   FinalDir=gene_pred/final/$Organism/$Strain/final
+   GffFiltered=$FinalDir/filtered_duplicates.gff
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
+   $ProgDir/remove_dup_features.py --inp_gff $GffAppended --out_gff $GffFiltered
+   GffRenamed=$FinalDir/final_genes_appended_renamed.gff3
+   LogFile=$FinalDir/final_genes_appended_renamed.log
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/codingquary
+   $ProgDir/gff_rename_genes.py --inp_gff $GffFiltered --conversion_log $LogFile > $GffRenamed
+   rm $GffFiltered
+   Assembly=$(ls repeat_masked/F.oxysporum_fsp_pisi/R2_minion/minion_submission/R2_contigs_softmasked_repeatmasker_TPSI_appended.fa)
+   $ProgDir/gff2fasta.pl $Assembly $GffRenamed gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed
+   # The proteins fasta file contains * instead of Xs for stop codons, these should be changed
+   sed -i 's/\*/X/g' gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.pep.fasta
 done
 ```
 
@@ -1580,8 +1562,8 @@ if so the gene feature will need to be stripped out of the gff file seperately.
 
 ```bash
 for File in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.pep.fasta); do
-echo $File | rev | cut -f3 -d '/' |  rev
-cat $File | grep '>' | wc -l
+   echo $File | rev | cut -f3 -d '/' |  rev
+   cat $File | grep '>' | wc -l
 done
 ```
 ```bash
@@ -1599,36 +1581,37 @@ R2_minion
 
 ```bash
 for Assembly in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.gene.fasta); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/busco
-BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
-OutDir=gene_pred/busco/$Organism/$Strain/transcript
-qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
+   Strain=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Assembly | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/busco
+   BuscoDB=$(ls -d /home/groups/harrisonlab/dbBusco/sordariomyceta_odb9)
+   OutDir=gene_pred/busco/$Organism/$Strain/transcript
+   qsub $ProgDir/sub_busco3.sh $Assembly $BuscoDB $OutDir
 done
 ``` 
-
+```bash
+Job numbers
 F.oxysporum_fsp_pisi - F81_minion
 Your job 8567954 ("sub_busco3.sh") has been submitted
 F.oxysporum_fsp_pisi - FOP1-EMR_minion
 Your job 8567955 ("sub_busco3.sh") has been submitted
 F.oxysporum_fsp_pisi - R2_minion
 Your job 8567956 ("sub_busco3.sh") has been submitted
-
+```
 
 
 ```bash      
- for File in $(ls gene_pred/busco/*/*/transcript/*/short_summary_*.txt); do
- Strain=$(echo $File| rev | cut -d '/' -f4 | rev)
- Organism=$(echo $File | rev | cut -d '/' -f5 | rev)
- Complete=$(cat $File | grep "(C)" | cut -f2)
- Single=$(cat $File | grep "(S)" | cut -f2)
- Fragmented=$(cat $File | grep "(F)" | cut -f2)
- Missing=$(cat $File | grep "(M)" | cut -f2)
- Total=$(cat $File | grep "Total" | cut -f2)
- echo -e "$Organism\t$Strain\t$Complete\t$Single\t$Fragmented\t$Missing\t$Total"
- done
+for File in $(ls gene_pred/busco/*/*/transcript/*/short_summary_*.txt); do
+   Strain=$(echo $File| rev | cut -d '/' -f4 | rev)
+   Organism=$(echo $File | rev | cut -d '/' -f5 | rev)
+   Complete=$(cat $File | grep "(C)" | cut -f2)
+   Single=$(cat $File | grep "(S)" | cut -f2)
+   Fragmented=$(cat $File | grep "(F)" | cut -f2)
+   Missing=$(cat $File | grep "(M)" | cut -f2)
+   Total=$(cat $File | grep "Total" | cut -f2)
+   echo -e "$Organism\t$Strain\t$Complete\t$Single\t$Fragmented\t$Missing\t$Total"
+done
 ```
 ```
  										Complete	Single	Fragmented Missing	Total
@@ -1653,9 +1636,9 @@ Open screen (new= screen -a,  resume one open= screen -r) exit screen using Ctrl
 
 ```bash
 ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/interproscan
-for Genes in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.pep.fasta); do
-echo $Genes
-$ProgDir/sub_interproscan.sh $Genes
+   for Genes in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.pep.fasta); do
+   echo $Genes
+   $ProgDir/sub_interproscan.sh $Genes
 done 2>&1 | tee -a interproscan_submisison.log
 ```
 
@@ -1664,12 +1647,12 @@ Following interproscan annotation split files were combined using the following 
 ```bash
 ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/interproscan
 for Proteins in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.pep.fasta); do
-Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
-Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-echo $Strain
-InterProRaw=gene_pred/interproscan/$Organism/$Strain/raw
-$ProgDir/append_interpro.sh $Proteins $InterProRaw
+   Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
+   Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
+   echo "$Organism - $Strain"
+   echo $Strain
+   InterProRaw=gene_pred/interproscan/$Organism/$Strain/raw
+   $ProgDir/append_interpro.sh $Proteins $InterProRaw
 done
 ```
 
@@ -1677,13 +1660,13 @@ done
 
 ```bash
 for Proteome in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.pep.fasta); do
-Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-OutDir=../../../../../data/scratch/jenkis/minion_functional_analysis/gene_pred/swissprot/$Organism/$Strain
-SwissDbDir=../../../../../home/groups/harrisonlab/uniprot/swissprot
-SwissDbName=uniprot_sprot
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/swissprot
-qsub $ProgDir/sub_swissprot.sh $Proteome $OutDir $SwissDbDir $SwissDbName
+   Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+   OutDir=../../../../../data/scratch/jenkis/minion_functional_analysis/gene_pred/swissprot/$Organism/$Strain
+   SwissDbDir=../../../../../home/groups/harrisonlab/uniprot/swissprot
+   SwissDbName=uniprot_sprot
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/swissprot
+   qsub $ProgDir/sub_swissprot.sh $Proteome $OutDir $SwissDbDir $SwissDbName
 done
 ```
 Your job 8567984 ("sub_swissprot.sh") has been submitted
@@ -1711,27 +1694,27 @@ Required programs:
 #for Proteome in $(ls gene_pred/final/*/FOP1-EMR_minion/final/final_genes_appended_renamed.pep.fasta); do
 for Proteome in $(ls gene_pred/final/*/R2_minion/final/final_genes_appended_renamed.pep.fasta); do
 #for Proteome in $(ls gene_pred/final/*/F81_minion/final/final_genes_appended_renamed.pep.fasta); do
-SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-#SplitfileDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
-ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
-#ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
-Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-SplitDir=gene_pred/braker_split/$Organism/$Strain
-mkdir -p $SplitDir
-BaseName="$Organism""_$Strain"_braker_preds
-$SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
-for File in $(ls $SplitDir/*_braker_preds_*); do
-#for File in $(ls $SplitDir/*_braker_preds_* | head -1); do
-Jobs=$(qstat | grep 'pred_sigP' | wc -l)
-while [ $Jobs -gt '20' ]; do
-sleep 10
-printf "."
-Jobs=$(qstat | grep 'pred_sigP' | wc -l)
-done
-printf "\n"
-echo $File
-qsub $ProgDir/pred_sigP.sh $File signalp-4.1
+   SplitfileDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+   #SplitfileDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+   ProgDir=/home/armita/git_repos/emr_repos/tools/seq_tools/feature_annotation/signal_peptides
+   #ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/signal_peptides
+   Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+   SplitDir=gene_pred/braker_split/$Organism/$Strain
+   mkdir -p $SplitDir
+   BaseName="$Organism""_$Strain"_braker_preds
+   $SplitfileDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName
+   for File in $(ls $SplitDir/*_braker_preds_*); do
+   #for File in $(ls $SplitDir/*_braker_preds_* | head -1); do
+   Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+   while [ $Jobs -gt '20' ]; do
+   sleep 10
+   printf "."
+   Jobs=$(qstat | grep 'pred_sigP' | wc -l)
+   done
+   printf "\n"
+   echo $File
+   qsub $ProgDir/pred_sigP.sh $File signalp-4.1
 done
 done >pred_sigp_R2.txt
 ```
@@ -1740,24 +1723,24 @@ done >pred_sigp_R2.txt
 #### The batch files of predicted secreted proteins needed to be combined into a single file for each strain. This was done with the following commands:
 ```bash
 for SplitDir in $(ls -d gene_pred/braker_split/*/*); do
-Strain=$(echo $SplitDir | cut -d '/' -f4)
-Organism=$(echo $SplitDir | cut -d '/' -f3)
-InStringAA=''
-InStringNeg=''
-InStringTab=''
-InStringTxt=''
-SigpDir=braker_signalp-4.1
-echo "$Organism - $Strain"
-for GRP in $(ls -l $SplitDir/*_braker_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
-InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.aa";  
-InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp_neg.aa";  
-InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.tab";
-InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.txt";  
-done
-cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
-cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
-tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
-cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
+   Strain=$(echo $SplitDir | cut -d '/' -f4)
+   Organism=$(echo $SplitDir | cut -d '/' -f3)
+   InStringAA=''
+   InStringNeg=''
+   InStringTab=''
+   InStringTxt=''
+   SigpDir=braker_signalp-4.1
+   echo "$Organism - $Strain"
+   for GRP in $(ls -l $SplitDir/*_braker_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do  
+   InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.aa";  
+   InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp_neg.aa";  
+   InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.tab";
+   InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_braker_preds_$GRP""_sp.txt";  
+   done
+   cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.aa
+   cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_neg_sp.aa
+   tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.tab
+   cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_aug_sp.txt
 done
 ```
 
@@ -1768,10 +1751,10 @@ Some proteins that are incorporated into the cell membrane require secretion. Th
 
 ```bash
 for Proteome in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.pep.fasta); do
-Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/transmembrane_helices
-qsub $ProgDir/submit_TMHMM.sh $Proteome
+   Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/transmembrane_helices
+   qsub $ProgDir/submit_TMHMM.sh $Proteome
 done
 ```
 
@@ -1787,26 +1770,26 @@ Done for each isolate FOP1 EMR, F81, R2
 ```bash
 #for File in $(ls gene_pred/trans_mem/*/*/*_TM_genes_neg.txt); do
 for File in $(ls gene_pred/trans_mem/*/R2_minion/*_TM_genes_neg.txt); do
-Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
-Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
-# echo "$Organism - $Strain"
-NonTmHeaders=$(echo "$File" | sed 's/neg.txt/neg_headers.txt/g')
-cat $File | cut -f1 > $NonTmHeaders
-SigP=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/"$Strain"_aug_sp.aa)
-OutDir=$(dirname $SigP)
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
-$ProgDir/extract_from_fasta.py --fasta $SigP --headers $NonTmHeaders > $OutDir/"$Strain"_final_sp_no_trans_mem.aa
-# echo "Number of SigP proteins:"
-TotalProts=$(cat $SigP | grep '>' | wc -l)
-# echo "Number without transmembrane domains:"
-SecProt=$(cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | wc -l)
-# echo "Number of gene models:"
-SecGene=$(cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | cut -f1 -d't' | sort | uniq |wc -l)
-# A text file was also made containing headers of proteins testing +ve
-PosFile=$(ls gene_pred/trans_mem/$Organism/$Strain/"$Strain"_TM_genes_pos.txt)
-TmHeaders=$(echo $PosFile | sed 's/.txt/_headers.txt/g')
-cat $PosFile | cut -f1 > $TmHeaders
-printf "$Organism\t$Strain\t$TotalProts\t$SecProt\t$SecGene\n"
+   Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+   Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+   # echo "$Organism - $Strain"
+   NonTmHeaders=$(echo "$File" | sed 's/neg.txt/neg_headers.txt/g')
+   cat $File | cut -f1 > $NonTmHeaders
+   SigP=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/"$Strain"_aug_sp.aa)
+   OutDir=$(dirname $SigP)
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
+   $ProgDir/extract_from_fasta.py --fasta $SigP --headers $NonTmHeaders > $OutDir/"$Strain"_final_sp_no_trans_mem.aa
+   # echo "Number of SigP proteins:"
+   TotalProts=$(cat $SigP | grep '>' | wc -l)
+   # echo "Number without transmembrane domains:"
+   SecProt=$(cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | wc -l)
+   # echo "Number of gene models:"
+   SecGene=$(cat $OutDir/"$Strain"_final_sp_no_trans_mem.aa | grep '>' | cut -f1 -d't' | sort | uniq |wc -l)
+   # A text file was also made containing headers of proteins testing +ve
+   PosFile=$(ls gene_pred/trans_mem/$Organism/$Strain/"$Strain"_TM_genes_pos.txt)
+   TmHeaders=$(echo $PosFile | sed 's/.txt/_headers.txt/g')
+   cat $PosFile | cut -f1 > $TmHeaders
+   printf "$Organism\t$Strain\t$TotalProts\t$SecProt\t$SecGene\n"
 done
 ```
 ```bash
@@ -1826,12 +1809,12 @@ Required programs:
  
 ```bash
 for Proteome in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.pep.fasta); do
-Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-BaseName="$Organism"_"$Strain"_EffectorP
-OutDir=analysis/effectorP/$Organism/$Strain
-ProgDir=~/git_repos/tools/seq_tools/feature_annotation/fungal_effectors
-qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
+   Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+   BaseName="$Organism"_"$Strain"_EffectorP
+   OutDir=analysis/effectorP/$Organism/$Strain
+   ProgDir=~/git_repos/tools/seq_tools/feature_annotation/fungal_effectors
+   qsub $ProgDir/pred_effectorP.sh $Proteome $BaseName $OutDir
 done
 ```
 Your job 8568139 ("pred_effectorP.sh") has been submitted
@@ -1847,25 +1830,25 @@ Note - this doesnt exclude proteins with TM domains or GPI anchors
 Ran for FOP1-EMR, F81 and R2
 ```bash
 for File in $(ls analysis/effectorP/*/R2_minion/*_EffectorP.txt); do
-Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
-Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
-echo "$Organism - $Strain"
-Headers=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_headers.txt/g')
-cat $File | grep 'Effector' | grep -v 'Effector probability:' | cut -f1 > $Headers
-printf "EffectorP headers:\t"
-cat $Headers | wc -l
-Secretome=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
-OutFile=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
-$ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
-OutFileHeaders=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted_headers.txt/g')
-cat $OutFile | grep '>' | tr -d '>' > $OutFileHeaders
-printf "Secreted effectorP headers:\t"
-cat $OutFileHeaders | wc -l
-Gff=$(ls gene_pred/final/$Organism/$Strain/*/final_genes_appended_renamed.gff3)
-EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
-$ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
+   Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+   Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+   echo "$Organism - $Strain"
+   Headers=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_headers.txt/g')
+   cat $File | grep 'Effector' | grep -v 'Effector probability:' | cut -f1 > $Headers
+   printf "EffectorP headers:\t"
+   cat $Headers | wc -l
+   Secretome=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
+   OutFile=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
+   $ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
+   OutFileHeaders=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted_headers.txt/g')
+   cat $OutFile | grep '>' | tr -d '>' > $OutFileHeaders
+   printf "Secreted effectorP headers:\t"
+   cat $OutFileHeaders | wc -l
+   Gff=$(ls gene_pred/final/$Organism/$Strain/*/final_genes_appended_renamed.gff3)
+   EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
+   $ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
 done
 ```
 ```bash
@@ -1890,16 +1873,16 @@ Small secreted cysteine rich proteins were identified within secretomes. These p
 Done for FOP1 EMR, F81 and R2
 ```bash
 for Secretome in $(ls gene_pred/braker_signalp-4.1/*/R2_minion/*_final_sp_no_trans_mem.aa); do
-Strain=$(echo $Secretome| rev | cut -f2 -d '/' | rev)
-Organism=$(echo $Secretome | rev | cut -f3 -d '/' | rev)
-echo "$Organism - $Strain"
-OutDir=analysis/sscp/$Organism/$Strain
-mkdir -p $OutDir
-ProgDir=/home/jenkis/git_repos/tools/pathogen/sscp
-$ProgDir/sscp_filter.py --inp_fasta $Secretome --max_length 300 --threshold 3 --out_fasta $OutDir/"$Strain"_sscp_all_results.fa
-cat $OutDir/"$Strain"_sscp_all_results.fa | grep 'Yes' > $OutDir/"$Strain"_sscp.fa
-printf "number of SSC-rich genes:\t"
-cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' | cut -f1 -d '.' | sort | uniq | wc -l
+   Strain=$(echo $Secretome| rev | cut -f2 -d '/' | rev)
+   Organism=$(echo $Secretome | rev | cut -f3 -d '/' | rev)
+   echo "$Organism - $Strain"
+   OutDir=analysis/sscp/$Organism/$Strain
+   mkdir -p $OutDir
+   ProgDir=/home/jenkis/git_repos/tools/pathogen/sscp
+   $ProgDir/sscp_filter.py --inp_fasta $Secretome --max_length 300 --threshold 3 --out_fasta $OutDir/"$Strain"_sscp_all_results.fa
+   cat $OutDir/"$Strain"_sscp_all_results.fa | grep 'Yes' > $OutDir/"$Strain"_sscp.fa
+   printf "number of SSC-rich genes:\t"
+   cat $OutDir/"$Strain"_sscp.fa | grep '>' | tr -d '>' | cut -f1 -d '.' | sort | uniq | wc -l
 done
 ```
 ```bash
@@ -1929,14 +1912,14 @@ Carbohydrte active enzymes were idnetified using CAZY following recomendations a
 
 ```bash
 for Proteome in $(ls gene_pred/final/*/*/final/final_genes_appended_renamed.pep.fasta); do
-Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-OutDir=gene_pred/CAZY/$Organism/$Strain
-mkdir -p $OutDir
-Prefix="$Strain"_CAZY
-CazyHmm=../../../../../home/groups/harrisonlab/dbCAN/dbCAN-fam-HMMs.txt
-ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/HMMER
-qsub $ProgDir/sub_hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
+   Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+   Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+   OutDir=gene_pred/CAZY/$Organism/$Strain
+   mkdir -p $OutDir
+   Prefix="$Strain"_CAZY
+   CazyHmm=../../../../../home/groups/harrisonlab/dbCAN/dbCAN-fam-HMMs.txt
+   ProgDir=/home/jenkis/git_repos/tools/seq_tools/feature_annotation/HMMER
+   qsub $ProgDir/sub_hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
 done
 ```
 Your job 8568142 ("sub_hmmscan.sh") has been submitted
@@ -1950,36 +1933,36 @@ Those proteins with a signal peptide were extracted from the list and gff files 
 Done for F81, FOP1-EMR and R2
 ```bash
 for File in $(ls gene_pred/CAZY/*/R2_minion/*CAZY.out.dm); do
-Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
-Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
-OutDir=$(dirname $File)
-# echo "$Organism - $Strain"
-ProgDir=/home/groups/harrisonlab/dbCAN
-$ProgDir/hmmscan-parser.sh $OutDir/"$Strain"_CAZY.out.dm > $OutDir/"$Strain"_CAZY.out.dm.ps
-CazyHeaders=$(echo $File | sed 's/.out.dm/_headers.txt/g')
-cat $OutDir/"$Strain"_CAZY.out.dm.ps | cut -f3 | sort | uniq > $CazyHeaders
-# echo "number of CAZY proteins identified:"
-TotalProts=$(cat $CazyHeaders | wc -l)
-# Gff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
-Gff=$(ls gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
-CazyGff=$OutDir/"$Strain"_CAZY.gff
-ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
-$ProgDir/extract_gff_for_sigP_hits.pl $CazyHeaders $Gff CAZyme ID > $CazyGff
-# echo "number of CAZY genes identified:"
-TotalGenes=$(cat $CazyGff | grep -w 'gene' | wc -l)
+   Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
+   Organism=$(echo $File | rev | cut -f3 -d '/' | rev)
+   OutDir=$(dirname $File)
+   # echo "$Organism - $Strain"
+   ProgDir=/home/groups/harrisonlab/dbCAN
+   $ProgDir/hmmscan-parser.sh $OutDir/"$Strain"_CAZY.out.dm > $OutDir/"$Strain"_CAZY.out.dm.ps
+   CazyHeaders=$(echo $File | sed 's/.out.dm/_headers.txt/g')
+   cat $OutDir/"$Strain"_CAZY.out.dm.ps | cut -f3 | sort | uniq > $CazyHeaders
+   # echo "number of CAZY proteins identified:"
+   TotalProts=$(cat $CazyHeaders | wc -l)
+   # Gff=$(ls gene_pred/codingquary/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
+   Gff=$(ls gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
+   CazyGff=$OutDir/"$Strain"_CAZY.gff
+   ProgDir=/home/jenkis/git_repos/tools/gene_prediction/ORF_finder
+   $ProgDir/extract_gff_for_sigP_hits.pl $CazyHeaders $Gff CAZyme ID > $CazyGff
+   # echo "number of CAZY genes identified:"
+   TotalGenes=$(cat $CazyGff | grep -w 'gene' | wc -l)
 
-SecretedProts=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
-SecretedHeaders=$(echo $SecretedProts | sed 's/.aa/_headers.txt/g')
-cat $SecretedProts | grep '>' | tr -d '>' > $SecretedHeaders
-CazyGffSecreted=$OutDir/"$Strain"_CAZY_secreted.gff
-$ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $CazyGff Secreted_CAZyme ID > $CazyGffSecreted
-# echo "number of Secreted CAZY proteins identified:"
-cat $CazyGffSecreted | grep -w 'mRNA' | cut -f9 | tr -d 'ID=' | cut -f1 -d ';' > $OutDir/"$Strain"_CAZY_secreted_headers.txt
-SecProts=$(cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | wc -l)
-# echo "number of Secreted CAZY genes identified:"
-SecGenes=$(cat $CazyGffSecreted | grep -w 'gene' | wc -l)
-# cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | cut -f1 -d '.' | sort | uniq | wc -l
-printf "$Organism\t$Strain\t$TotalProts\t$TotalGenes\t$SecProts\t$SecGenes\n"
+   SecretedProts=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/"$Strain"_final_sp_no_trans_mem.aa)
+   SecretedHeaders=$(echo $SecretedProts | sed 's/.aa/_headers.txt/g')
+   cat $SecretedProts | grep '>' | tr -d '>' > $SecretedHeaders
+   CazyGffSecreted=$OutDir/"$Strain"_CAZY_secreted.gff
+   $ProgDir/extract_gff_for_sigP_hits.pl $SecretedHeaders $CazyGff Secreted_CAZyme ID > $CazyGffSecreted
+   # echo "number of Secreted CAZY proteins identified:"
+   cat $CazyGffSecreted | grep -w 'mRNA' | cut -f9 | tr -d 'ID=' | cut -f1 -d ';' > $OutDir/"$Strain"_CAZY_secreted_headers.txt
+   SecProts=$(cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | wc -l)
+   # echo "number of Secreted CAZY genes identified:"
+   SecGenes=$(cat $CazyGffSecreted | grep -w 'gene' | wc -l)
+   # cat $OutDir/"$Strain"_CAZY_secreted_headers.txt | cut -f1 -d '.' | sort | uniq | wc -l
+   printf "$Organism\t$Strain\t$TotalProts\t$TotalGenes\t$SecProts\t$SecGenes\n"
 done
 ```
 ```bash
@@ -2014,14 +1997,14 @@ The best threshold varies for different CAZyme classes (please see http://www.nc
 
 ```bash
 for CAZY in $(ls gene_pred/CAZY/*/R2_minion/*_CAZY.out.dm.ps); do
-Strain=$(echo $CAZY | rev | cut -f2 -d '/' | rev)
-Organism=$(echo $CAZY | rev | cut -f3 -d '/' | rev)
-OutDir=$(dirname $CAZY)
-echo "$Organism - $Strain"
-Secreted=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem_headers.txt)
-Gff=$(ls gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
-ProgDir=/home/jenkis/git_repos/tools/pathogen/CAZY
-$ProgDir/summarise_CAZY.py --cazy $CAZY --inp_secreted $Secreted --inp_gff $Gff --summarise_family --trim_gene_id 2 --kubicek_2014
+   Strain=$(echo $CAZY | rev | cut -f2 -d '/' | rev)
+   Organism=$(echo $CAZY | rev | cut -f3 -d '/' | rev)
+   OutDir=$(dirname $CAZY)
+   echo "$Organism - $Strain"
+   Secreted=$(ls gene_pred/braker_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem_headers.txt)
+   Gff=$(ls gene_pred/final/$Organism/$Strain/final/final_genes_appended_renamed.gff3)
+   ProgDir=/home/jenkis/git_repos/tools/pathogen/CAZY
+   $ProgDir/summarise_CAZY.py --cazy $CAZY --inp_secreted $Secreted --inp_gff $Gff --summarise_family --trim_gene_id 2 --kubicek_2014
 done
 ```
 ```bash
